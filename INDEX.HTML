@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SullyBec Instituto - Gestión Clínica</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+        }
+        .section-title {
+            border-left: 4px solid #059669;
+            padding-left: 1rem;
+            margin-bottom: 1.5rem;
+            margin-top: 2rem;
+            color: #1e293b;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            letter-spacing: 0.05em;
+        }
+        .checkbox-pill {
+            display: flex;
+            align-items: center;
+            padding: 0.6rem 0.8rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .checkbox-pill:hover {
+            background-color: #f8fafc;
+        }
+        input[type="checkbox"]:checked + span {
+            color: #059669;
+            font-weight: 700;
+        }
+        .tab-active {
+            border-bottom: 4px solid #059669;
+            color: #059669;
+        }
+    </style>
+</head>
+<body class="pb-10">
+
+    <!-- Navegación de Pestañas -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto flex">
+            <button onclick="switchTab('triage')" id="btn-triage" class="flex-1 py-4 font-bold text-sm uppercase tracking-wider tab-active">
+                📝 Triage / Registro
+            </button>
+            <button onclick="switchTab('consultas')" id="btn-consultas" class="flex-1 py-4 font-bold text-sm uppercase tracking-wider text-slate-400">
+                🔍 Consultar Pacientes
+            </button>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto p-4 md:p-8">
+        
+        <!-- PESTAÑA 1: TRIAGE -->
+        <section id="tab-triage">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-emerald-700">SULLYBEC INSTITUTO</h1>
+                <p class="text-slate-500 font-medium">Captura de Datos - Feria DIF 2026</p>
+            </div>
+
+            <form id="clinicForm" class="bg-white rounded-2xl shadow-xl p-6 md:p-10 border border-slate-200">
+                <h2 class="section-title">1. Ficha de Identificación</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Nombre Completo</label>
+                        <input type="text" name="nombre" required class="w-full border-slate-200 border-2 rounded-lg p-2.5 outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Edad</label>
+                        <input type="number" name="edad" required class="w-full border-slate-200 border-2 rounded-lg p-2.5 outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Sexo / Género</label>
+                        <select name="genero" class="w-full border-slate-200 border-2 rounded-lg p-2.5 outline-none bg-white">
+                            <option value="Femenino">Femenino</option>
+                            <option value="Masculino">Masculino</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Teléfono</label>
+                        <input type="tel" name="telefono" class="w-full border-slate-200 border-2 rounded-lg p-2.5 outline-none">
+                    </div>
+                    <div class="md:col-span-1">
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Colonia</label>
+                        <input type="text" name="colonia" required class="w-full border-slate-200 border-2 rounded-lg p-2.5 outline-none">
+                    </div>
+                </div>
+
+                <h2 class="section-title text-red-600 border-red-600">2. Signos Vitales</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-red-50 p-4 rounded-xl">
+                    <input type="text" name="presion" placeholder="P. Arterial (120/80)" required class="border-2 p-2 rounded-lg">
+                    <input type="number" name="frecuencia" placeholder="F. Cardiaca (lpm)" required class="border-2 p-2 rounded-lg">
+                    <input type="number" step="0.1" name="temperatura" placeholder="Temp (°C)" required class="border-2 p-2 rounded-lg">
+                </div>
+
+                <h2 class="section-title text-orange-600 border-orange-600">3. Antecedentes y Contraindicaciones</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                    <div class="space-y-3">
+                        <label class="checkbox-pill bg-white flex justify-between items-center">
+                            <div class="flex items-center">
+                                <input type="checkbox" name="antecedente" value="Embarazo" class="mr-2 h-4 w-4">
+                                <span>Embarazo</span>
+                            </div>
+                            <input type="text" name="mes_embarazo" placeholder="Mes" class="w-16 border rounded px-1 text-xs outline-none focus:border-emerald-500 ml-2">
+                        </label>
+                        <label class="checkbox-pill bg-white"><input type="checkbox" name="antecedente" value="Hipertensión / Hipotensión" class="mr-2 h-4 w-4"><span>Hipertensión / Hipotensión</span></label>
+                        <label class="checkbox-pill bg-white"><input type="checkbox" name="antecedente" value="Diabetes" class="mr-2 h-4 w-4"><span>Diabetes</span></label>
+                        <label class="checkbox-pill bg-white"><input type="checkbox" name="antecedente" value="Marcapasos / Implantes metálicos" class="mr-2 h-4 w-4"><span>Marcapasos / Implantes metálicos</span></label>
+                    </div>
+                    <div class="space-y-3">
+                        <label class="checkbox-pill bg-white"><input type="checkbox" name="antecedente" value="Cirugía reciente (< 6 meses)" class="mr-2 h-4 w-4"><span>Cirugía reciente (< 6 meses)</span></label>
+                        <label class="checkbox-pill bg-white"><input type="checkbox" name="antecedente" value="Heridas abiertas / Infecciones piel" class="mr-2 h-4 w-4"><span>Heridas abiertas / Infecciones piel</span></label>
+                        <div class="mt-2">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Alergias (Aceites, metales, etc.):</label>
+                            <input type="text" name="alergias" placeholder="Especifique alergias..." class="w-full border-2 p-2 rounded-lg text-sm outline-none focus:border-emerald-500">
+                        </div>
+                        <div class="mt-2">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Toma algún medicamento:</label>
+                            <input type="text" name="medicamentos" placeholder="Nombre de medicamentos..." class="w-full border-2 p-2 rounded-lg text-sm outline-none focus:border-emerald-500">
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="section-title">4. Motivo y Notas</h2>
+                <textarea name="motivo" rows="2" placeholder="¿Cuál es el motivo de su consulta hoy?" class="w-full border-2 p-2 rounded-lg mb-4 outline-none focus:border-emerald-500"></textarea>
+                <textarea name="notas_adicionales" rows="3" placeholder="Observaciones adicionales para el terapeuta..." class="w-full border-2 p-2 rounded-lg bg-blue-50/30 outline-none focus:border-blue-500"></textarea>
+
+                <h2 class="section-title">5. Selección de Servicios</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- SERVICIO QUE PREFIERE -->
+                    <div class="p-5 border rounded-xl bg-emerald-50 border-emerald-100">
+                        <p class="text-sm font-bold mb-4 text-emerald-800 uppercase tracking-tight italic">Servicios que prefiere el paciente:</p>
+                        <div class="grid grid-cols-1 gap-2">
+                            <label class="checkbox-pill bg-white"><input type="checkbox" name="servicio_pref" value="Masaje Terapéutico" class="mr-3 h-4 w-4"><span>Masaje Terapéutico</span></label>
+                            <label class="checkbox-pill bg-white"><input type="checkbox" name="servicio_pref" value="Acupuntura" class="mr-3 h-4 w-4"><span>Acupuntura</span></label>
+                            <label class="checkbox-pill bg-white"><input type="checkbox" name="servicio_pref" value="Ventosas" class="mr-3 h-4 w-4"><span>Ventosas</span></label>
+                            <label class="checkbox-pill bg-white"><input type="checkbox" name="servicio_pref" value="Quiropráctica" class="mr-3 h-4 w-4"><span>Quiropráctica</span></label>
+                            <label class="checkbox-pill bg-white"><input type="checkbox" name="servicio_pref" value="Desintoxicación" class="mr-3 h-4 w-4"><span>Desintoxicación</span></label>
+                            <label class="checkbox-pill bg-white"><input type="checkbox" name="servicio_pref" value="Nutrición" class="mr-3 h-4 w-4"><span>Nutrición</span></label>
+                        </div>
+                    </div>
+
+                    <!-- SERVICIO RECIBIDO -->
+                    <div class="p-5 border rounded-xl bg-blue-50 border-blue-100">
+                        <p class="text-sm font-bold mb-4 text-blue-800 uppercase tracking-tight italic">Servicios aplicados en área:</p>
+                        <div class="grid grid-cols-1 gap-2">
+                            <label class="checkbox-pill bg-white"><input type="checkbox" name="servicio_rec" value="Masaje Terapéutico" class="mr-3 h-4 w-4"><span>Masaje Terapéutico</span></label>
+                            <label class="checkbox-pill bg-white"><input type="checkbox" name="servicio_rec" value="Acupuntura" class="mr-3 h-4 w-4"><span>Acupuntura</span></label>
+                            <label class="checkbox-pill bg-white"><input type="checkbox" name="servicio_rec" value="Ventosas" class="mr-3 h-4 w-4"><span>Ventosas</span></label>
+                            <label class="checkbox-pill bg-white"><input type="checkbox" name="servicio_rec" value="Quiropráctica" class="mr-3 h-4 w-4"><span>Quiropráctica</span></label>
+                            <label class="checkbox-pill bg-white"><input type="checkbox" name="servicio_rec" value="Desintoxicación" class="mr-3 h-4 w-4"><span>Desintoxicación</span></label>
+                            <label class="checkbox-pill bg-white"><input type="checkbox" name="servicio_rec" value="Nutrición" class="mr-3 h-4 w-4"><span>Nutrición</span></label>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" onclick="guardarRegistro()" class="w-full mt-10 bg-emerald-600 text-white font-bold py-5 rounded-xl shadow-lg hover:bg-emerald-700 transition-all text-lg">
+                    💾 GUARDAR REGISTRO
+                </button>
+            </form>
+        </section>
+
+        <!-- PESTAÑA 2: CONSULTAS -->
+        <section id="tab-consultas" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-slate-800">Pacientes Registrados</h2>
+                <button onclick="actualizarLista()" class="text-emerald-600 font-bold text-sm bg-white px-3 py-1 rounded-lg border">🔄 Refrescar</button>
+            </div>
+            
+            <div id="lista-pacientes" class="space-y-4">
+                <p class="text-center text-slate-400 py-10 italic">No hay registros guardados aún.</p>
+            </div>
+        </section>
+    </div>
+
+    <!-- Modal de Detalles del Paciente -->
+    <div id="modal-detalle" class="hidden fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-lg rounded-2xl max-h-[90vh] overflow-y-auto p-6 relative shadow-2xl">
+            <button onclick="cerrarModal()" class="absolute top-4 right-4 text-3xl text-slate-400 hover:text-slate-600">&times;</button>
+            <div id="detalle-content">
+                <!-- Se llena dinámicamente -->
+            </div>
+            <button onclick="cerrarModal()" class="w-full mt-6 bg-slate-800 text-white py-4 rounded-xl font-bold">CERRAR CONSULTA</button>
+        </div>
+    </div>
+
+    <script>
+        // --- LÓGICA DE NAVEGACIÓN ---
+        function switchTab(tab) {
+            document.getElementById('tab-triage').classList.toggle('hidden', tab !== 'triage');
+            document.getElementById('tab-consultas').classList.toggle('hidden', tab !== 'consultas');
+            
+            document.getElementById('btn-triage').classList.toggle('tab-active', tab === 'triage');
+            document.getElementById('btn-triage').classList.toggle('text-slate-400', tab !== 'triage');
+            document.getElementById('btn-consultas').classList.toggle('tab-active', tab === 'consultas');
+            document.getElementById('btn-consultas').classList.toggle('text-slate-400', tab !== 'consultas');
+
+            if (tab === 'consultas') actualizarLista();
+        }
+
+        // --- LÓGICA DE DATOS ---
+        function guardarRegistro() {
+            const form = document.getElementById('clinicForm');
+            if (!form.checkValidity()) {
+                alert("Por favor, completa los campos obligatorios del paciente y signos vitales.");
+                return;
+            }
+
+            const fd = new FormData(form);
+            const registro = {
+                id: Date.now(),
+                fecha: new Date().toLocaleString(),
+                nombre: fd.get('nombre'),
+                edad: fd.get('edad'),
+                genero: fd.get('genero'),
+                colonia: fd.get('colonia'),
+                presion: fd.get('presion'),
+                frecuencia: fd.get('frecuencia'),
+                temperatura: fd.get('temperatura'),
+                antecedentes: Array.from(fd.getAll('antecedente')),
+                mes_embarazo: fd.get('mes_embarazo'),
+                alergias: fd.get('alergias'),
+                medicamentos: fd.get('medicamentos'),
+                motivo: fd.get('motivo'),
+                notas: fd.get('notas_adicionales'),
+                servicios_pref: Array.from(fd.getAll('servicio_pref')),
+                servicios_rec: Array.from(fd.getAll('servicio_rec'))
+            };
+
+            let registros = JSON.parse(localStorage.getItem('feria_registros') || '[]');
+            registros.unshift(registro);
+            localStorage.setItem('feria_registros', JSON.stringify(registros));
+
+            alert("✅ Registro guardado. Ya está disponible en la lista de consultas.");
+            form.reset();
+            switchTab('consultas');
+        }
+
+        function actualizarLista() {
+            const container = document.getElementById('lista-pacientes');
+            const registros = JSON.parse(localStorage.getItem('feria_registros') || '[]');
+            
+            if (registros.length === 0) {
+                container.innerHTML = '<p class="text-center text-slate-400 py-10 italic">No hay registros guardados aún.</p>';
+                return;
+            }
+
+            container.innerHTML = registros.map(r => `
+                <div onclick="verDetalle(${r.id})" class="bg-white p-4 rounded-xl border-l-8 ${r.antecedentes.length > 0 || r.alergias ? 'border-red-500' : 'border-emerald-500'} shadow-sm cursor-pointer hover:bg-slate-50 transition-all">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-bold text-slate-800 uppercase text-base">${r.nombre}</h3>
+                            <p class="text-sm text-slate-500">${r.edad} años | ${r.colonia}</p>
+                        </div>
+                        <span class="text-[10px] bg-slate-100 px-2 py-1 rounded text-slate-500 font-bold">${r.fecha.split(',')[1]}</span>
+                    </div>
+                    ${r.antecedentes.length > 0 ? `<p class="mt-2 text-xs text-red-600 font-black uppercase">⚠️ ALERTA: ${r.antecedentes.join(', ')}</p>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function verDetalle(id) {
+            const registros = JSON.parse(localStorage.getItem('feria_registros') || '[]');
+            const r = registros.find(reg => reg.id === id);
+            if (!r) return;
+
+            const modal = document.getElementById('modal-detalle');
+            const content = document.getElementById('detalle-content');
+
+            content.innerHTML = `
+                <h2 class="text-2xl font-black text-slate-800 mb-1 uppercase">${r.nombre}</h2>
+                <p class="text-sm text-slate-500 mb-4 border-b pb-2">${r.edad} años | Género: ${r.genero}</p>
+                
+                <div class="grid grid-cols-3 gap-2 mb-6 text-center">
+                    <div class="bg-slate-50 p-2 rounded-lg">
+                        <p class="text-[10px] uppercase font-bold text-slate-400">Presión</p>
+                        <p class="font-bold text-base text-slate-800">${r.presion}</p>
+                    </div>
+                    <div class="bg-slate-50 p-2 rounded-lg">
+                        <p class="text-[10px] uppercase font-bold text-slate-400">Pulso</p>
+                        <p class="font-bold text-base text-slate-800">${r.frecuencia}</p>
+                    </div>
+                    <div class="bg-slate-50 p-2 rounded-lg">
+                        <p class="text-[10px] uppercase font-bold text-slate-400">Temp</p>
+                        <p class="font-bold text-base text-slate-800">${r.temperatura}°C</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="${r.antecedentes.length > 0 || r.alergias || r.medicamentos ? 'bg-red-100 p-4 rounded-lg border-2 border-red-200' : 'hidden'}">
+                        <p class="text-xs font-black text-red-700 uppercase mb-1 tracking-wider">⚠️ CONTRAINDICACIONES CRÍTICAS:</p>
+                        <div class="text-base font-bold text-red-900">
+                            ${r.antecedentes.map(a => a === 'Embarazo' ? `Embarazo (Mes: ${r.mes_embarazo || '?'})` : a).join(', ') || 'Ninguna'}
+                            ${r.alergias ? `<div class="mt-1 border-t border-red-200 pt-1 text-sm">ALERGIA: ${r.alergias}</div>` : ''}
+                            ${r.medicamentos ? `<div class="mt-1 border-t border-red-200 pt-1 text-sm text-slate-700 font-normal">MEDICAMENTO: ${r.medicamentos}</div>` : ''}
+                        </div>
+                    </div>
+
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase mb-1">Motivo principal:</p>
+                        <p class="text-base text-slate-800 font-medium">${r.motivo || 'No especificado'}</p>
+                    </div>
+
+                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                        <p class="text-xs font-bold text-blue-700 uppercase mb-1 tracking-wider">Notas de Triage:</p>
+                        <p class="text-base italic text-blue-900 leading-tight">${r.notas || 'Sin observaciones adicionales'}</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-xs font-bold text-emerald-700 uppercase mb-1">Servicios solicitados:</p>
+                            <p class="text-sm text-emerald-900 font-bold">${r.servicios_pref.join(', ') || 'Ninguno'}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-blue-700 uppercase mb-1">Servicios aplicados:</p>
+                            <p class="text-sm text-blue-900 font-bold">${r.servicios_rec.join(', ') || 'Pendiente'}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+        }
+
+        function cerrarModal() {
+            document.getElementById('modal-detalle').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
