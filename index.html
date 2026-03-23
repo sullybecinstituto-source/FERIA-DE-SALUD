@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SullyBec Instituto - Gestión Clínica Cloud</title>
+    <title>SullyBec Instituto - Gestión Clínica Feria</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
@@ -13,8 +13,6 @@
         .checkbox-pill:hover { background-color: #f8fafc; }
         input[type="checkbox"]:checked + span { color: #059669; font-weight: 700; }
         .tab-active { border-bottom: 4px solid #059669; color: #059669; }
-        .logo-container { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 2rem; }
-        .logo-img { max-width: 180px; height: auto; margin-bottom: 1rem; }
         @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         .animate-pop { animation: popIn 0.3s ease-out forwards; }
     </style>
@@ -23,9 +21,6 @@
 
     <nav class="bg-white shadow-md sticky top-0 z-50">
         <div class="max-w-4xl mx-auto flex items-center overflow-x-auto">
-            <div class="px-4 flex-none border-r border-slate-100 py-2">
-                <img src="https://via.placeholder.com/150x50?text=SullyBec" alt="Logo" class="h-10 w-auto">
-            </div>
             <button onclick="switchTab('triage')" id="btn-triage" class="flex-none px-6 py-4 font-bold text-xs uppercase tracking-wider tab-active">📝 Registro</button>
             <button onclick="switchTab('consultas')" id="btn-consultas" class="flex-none px-6 py-4 font-bold text-xs uppercase tracking-wider text-slate-400">🔍 Consultas</button>
             <button onclick="switchTab('papelera')" id="btn-papelera" class="flex-none px-6 py-4 font-bold text-xs uppercase tracking-wider text-slate-400">🗑️ Papelera</button>
@@ -34,11 +29,10 @@
 
     <div class="max-w-4xl mx-auto p-4 md:p-8">
         <section id="tab-triage">
-            <div class="logo-container">
-                <div class="text-center">
-                    <h1 class="text-3xl font-bold text-emerald-700 uppercase tracking-tight">SullyBec Instituto</h1>
-                    <p class="text-slate-500 font-medium italic">Feria de Salud Integral 2026 (Sincronizado)</p>
-                </div>
+            <div class="text-center mb-8 flex flex-col items-center">
+                <img src="https://i.ibb.co/Xz9gLgM/Sullybec-Instituto-Logo.png" alt="SullyBec Instituto" class="h-24 w-auto mb-4">
+                <h1 class="text-3xl font-bold text-emerald-700 uppercase">SullyBec Instituto</h1>
+                <p class="text-slate-500 font-medium italic">Feria de Salud 2026 - Sincronizado</p>
             </div>
 
             <form id="clinicForm" class="bg-white rounded-2xl shadow-xl p-6 md:p-10 border border-slate-200">
@@ -62,9 +56,9 @@
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-slate-700 mb-1">Teléfono</label>
-                        <input type="tel" name="telefono" placeholder="Ej. 5512345678" class="w-full border-slate-200 border-2 rounded-lg p-2.5 outline-none focus:border-emerald-500">
+                        <input type="tel" name="telefono" required class="w-full border-slate-200 border-2 rounded-lg p-2.5 outline-none focus:border-emerald-500">
                     </div>
-                    <div class="md:col-span-1">
+                    <div>
                         <label class="block text-sm font-semibold text-slate-700 mb-1">Colonia</label>
                         <input type="text" name="colonia" required class="w-full border-slate-200 border-2 rounded-lg p-2.5 outline-none focus:border-emerald-500">
                     </div>
@@ -72,44 +66,35 @@
 
                 <h2 class="section-title text-red-600 border-red-600">2. Signos Vitales</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-red-50 p-4 rounded-xl">
-                    <input type="text" name="presion" placeholder="P. Arterial (120/80)" required class="border-2 p-2 rounded-lg outline-none focus:border-red-400">
-                    <input type="number" name="frecuencia" placeholder="F. Cardiaca (lpm)" required class="border-2 p-2 rounded-lg outline-none focus:border-red-400">
-                    <input type="number" step="0.1" name="temperatura" placeholder="Temp (°C)" required class="border-2 p-2 rounded-lg outline-none focus:border-red-400">
+                    <input type="text" name="presion" placeholder="P. Arterial (120/80)" required class="border-2 p-2 rounded-lg outline-none">
+                    <input type="number" name="frecuencia" placeholder="F. Cardiaca (lpm)" required class="border-2 p-2 rounded-lg outline-none">
+                    <input type="number" step="0.1" name="temperatura" placeholder="Temp (°C)" required class="border-2 p-2 rounded-lg outline-none">
                 </div>
 
-                <h2 class="section-title text-orange-600 border-orange-600">3. Antecedentes</h2>
+                <h2 class="section-title text-orange-600 border-orange-600">3. Antecedentes y Salud</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
                     <div class="space-y-3">
-                        <label class="checkbox-pill bg-white flex justify-between items-center border-orange-100">
-                            <div class="flex items-center">
-                                <input type="checkbox" name="antecedente" value="Embarazo" class="mr-2 h-4 w-4">
-                                <span class="text-sm">Embarazo</span>
-                            </div>
-                            <input type="text" name="mes_embarazo" placeholder="Mes" class="w-16 border rounded px-1 text-xs outline-none focus:border-orange-500 ml-2">
-                        </label>
-                        <label class="checkbox-pill bg-white border-orange-100 text-sm"><input type="checkbox" name="antecedente" value="Hipertensión" class="mr-2 h-4 w-4"><span>Hipertensión / Hipotensión</span></label>
-                        <label class="checkbox-pill bg-white border-orange-100 text-sm"><input type="checkbox" name="antecedente" value="Diabetes" class="mr-2 h-4 w-4"><span>Diabetes</span></label>
+                        <label class="checkbox-pill bg-white border-orange-100 text-sm"><input type="checkbox" name="antecedente" value="Diabetes" class="mr-2"><span>Diabetes</span></label>
+                        <label class="checkbox-pill bg-white border-orange-100 text-sm"><input type="checkbox" name="antecedente" value="Hipertensión" class="mr-2"><span>Hipertensión</span></label>
+                        <label class="checkbox-pill bg-white border-orange-100 text-sm"><input type="checkbox" name="antecedente" value="Cáncer" class="mr-2"><span>Cáncer</span></label>
+                        <label class="checkbox-pill bg-white border-orange-100 text-sm"><input type="checkbox" name="antecedente" value="Embarazo" class="mr-2"><span>Embarazo</span></label>
                     </div>
                     <div class="space-y-3">
-                        <div class="mt-2">
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Alergias:</label>
-                            <input type="text" name="alergias" placeholder="Especifique..." class="w-full border-2 p-2 rounded-lg text-sm outline-none focus:border-emerald-500">
-                        </div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Medicamentos que toma:</label>
+                        <textarea name="medicamentos" rows="2" class="w-full border-2 p-2 rounded-lg text-sm outline-none focus:border-orange-400" placeholder="Lista de medicamentos..."></textarea>
+                        
+                        <label class="block text-xs font-bold text-slate-500 uppercase mt-2 mb-1">Alergias:</label>
+                        <input type="text" name="alergias" class="w-full border-2 p-2 rounded-lg text-sm outline-none focus:border-orange-400" placeholder="¿A qué es alérgico?">
                     </div>
                 </div>
 
-                <h2 class="section-title">4. Motivo y Servicios</h2>
-                <textarea name="motivo" rows="3" placeholder="¿Cuál es el motivo de su visita?" class="w-full border-2 p-3 rounded-lg mb-4 text-base outline-none focus:border-emerald-500 bg-slate-50/30"></textarea>
-                
+                <h2 class="section-title">4. Servicios</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="p-5 border rounded-xl bg-emerald-50 border-emerald-100">
-                        <p class="text-xs font-bold mb-4 text-emerald-800 uppercase italic">Preferencias:</p>
-                        <div id="pref-list" class="grid grid-cols-1 gap-2"></div>
-                    </div>
-                    <div class="p-5 border rounded-xl bg-blue-50 border-blue-100">
-                        <p class="text-xs font-bold mb-4 text-blue-800 uppercase italic">Aplicados:</p>
+                    <div class="p-4 border rounded-xl bg-emerald-50 border-emerald-100">
+                        <p class="text-xs font-bold mb-4 uppercase text-emerald-800">Servicios Aplicados:</p>
                         <div id="rec-list" class="grid grid-cols-1 gap-2"></div>
                     </div>
+                    <textarea name="motivo" rows="4" placeholder="Observaciones adicionales..." class="w-full border-2 p-3 rounded-lg outline-none focus:border-emerald-500 bg-slate-50/30"></textarea>
                 </div>
 
                 <button type="button" onclick="guardarRegistro()" class="w-full mt-10 bg-emerald-600 text-white font-bold py-6 rounded-2xl shadow-lg hover:bg-emerald-700 transition-all text-xl uppercase tracking-widest">
@@ -119,23 +104,12 @@
         </section>
 
         <section id="tab-consultas" class="hidden">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                <div>
-                    <h2 class="text-2xl font-bold text-slate-800">Pacientes Sincronizados</h2>
-                    <p class="text-xs text-slate-500">Los cambios se ven en todos los dispositivos al instante</p>
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="solicitarPasswordModal('export')" class="bg-emerald-100 text-emerald-700 font-bold text-sm px-4 py-3 rounded-xl border border-emerald-200">🔒 Excel</button>
-                </div>
-            </div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-6">Pacientes Registrados</h2>
             <div id="lista-pacientes" class="grid grid-cols-1 gap-4"></div>
         </section>
 
         <section id="tab-papelera" class="hidden">
-            <div class="mb-6 border-b pb-4 flex justify-between items-end">
-                <h2 class="text-2xl font-bold text-slate-600">Papelera</h2>
-                <button onclick="solicitarPasswordModal('vaciar')" class="text-xs font-bold text-red-500 uppercase">Vaciar</button>
-            </div>
+            <h2 class="text-2xl font-bold text-slate-600 mb-6">Papelera</h2>
             <div id="lista-papelera" class="grid grid-cols-1 gap-4"></div>
         </section>
     </div>
@@ -143,37 +117,24 @@
     <div id="modal-success" class="hidden fixed inset-0 bg-black/70 z-[300] flex items-center justify-center p-6">
         <div class="bg-white p-8 rounded-3xl max-w-sm w-full text-center animate-pop">
             <div class="text-6xl mb-4">✅</div>
-            <h3 class="text-2xl font-black mb-8 uppercase">¡Subido a la Nube!</h3>
+            <h3 class="text-2xl font-black mb-8 uppercase">¡Guardado con Éxito!</h3>
             <button onclick="cerrarSuccess()" class="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold">Continuar</button>
         </div>
     </div>
 
-    <div id="modal-password" class="hidden fixed inset-0 bg-slate-900/90 z-[400] flex items-center justify-center p-6">
-        <div class="bg-white p-8 rounded-3xl max-w-sm w-full text-center animate-pop">
-            <h3 id="password-modal-title" class="text-xl font-black mb-4 uppercase">Acceso Restringido</h3>
-            <input type="password" id="input-export-pass" placeholder="••••" class="w-full bg-slate-50 border-2 p-4 rounded-2xl mb-8 text-center text-2xl outline-none focus:border-emerald-500">
-            <div class="flex gap-4">
-                <button onclick="cerrarPassword()" class="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-bold">CANC</button>
-                <button id="btn-validar-pass" class="flex-1 py-4 bg-emerald-600 text-white rounded-2xl font-bold">OK</button>
-            </div>
-        </div>
-    </div>
-
     <div id="modal-detalle" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-2xl rounded-3xl max-h-[95vh] overflow-hidden flex flex-col relative animate-pop">
+        <div class="bg-white w-full max-w-2xl rounded-3xl max-h-[95vh] overflow-hidden flex flex-col animate-pop">
             <div id="detalle-content" class="overflow-y-auto p-6 flex-1"></div>
-            <div class="p-6 bg-slate-50 border-t flex gap-3">
-                <button onclick="cerrarModal()" class="flex-1 bg-slate-200 py-4 rounded-2xl font-bold uppercase">Cerrar</button>
-                <button id="btn-save-treatment" class="flex-1 bg-emerald-600 text-white py-4 rounded-2xl font-bold uppercase">Guardar</button>
+            <div class="p-6 bg-slate-50 border-t">
+                <button onclick="cerrarModal()" class="w-full bg-slate-200 py-4 rounded-2xl font-bold uppercase">Cerrar</button>
             </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+        import { getDatabase, ref, set, onValue, update, remove } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
 
-        // CONFIGURACIÓN DE TU PROYECTO
         const firebaseConfig = {
             apiKey: "AIzaSyAdeZG8-SX37MVIa2HcH_MRlPyu1eRrd-U",
             authDomain: "feriadesaludsullybec.firebaseapp.com",
@@ -186,37 +147,24 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-
-        // Variables Globales
-        const EXPORT_PASSWORD = "Sully2026";
-        const SERVICIOS = ["Masaje Terapéutico", "Acupuntura", "Ventosas", "Quiropráctica", "Desintoxicación Iónica", "Nutrición", "Biomagnetismo", "Corte de Cabello"];
         let dataGlobal = [];
 
-        // Inicialización
+        const SERVICIOS = ["Masaje Terapéutico", "Acupuntura", "Ventosas", "Quiropráctica", "Desintoxicación Iónica", "Nutrición", "Biomagnetismo", "Corte de Cabello"];
+
         window.addEventListener('DOMContentLoaded', () => {
-            renderServicios();
+            const container = document.getElementById('rec-list');
+            container.innerHTML = SERVICIOS.map(s => `
+                <label class="checkbox-pill bg-white">
+                    <input type="checkbox" name="servicio_rec" value="${s}" class="mr-3 h-5 w-5">
+                    <span class="text-base">${s}</span>
+                </label>
+            `).join('');
             escucharDatos();
         });
 
-        function renderServicios() {
-            const prefContainer = document.getElementById('pref-list');
-            const recContainer = document.getElementById('rec-list');
-            const html = SERVICIOS.map(s => `
-                <label class="checkbox-pill bg-white">
-                    <input type="checkbox" name="servicio_X" value="${s}" class="mr-3 h-5 w-5">
-                    <span class="text-base">${s}</span>
-                </label>
-            `);
-            prefContainer.innerHTML = html.map(h => h.replace('servicio_X', 'servicio_pref')).join('');
-            recContainer.innerHTML = html.map(h => h.replace('servicio_X', 'servicio_rec')).join('');
-        }
-
-        // --- FUNCIONES CORE FIREBASE ---
-
-        // 1. Guardar Registro
         window.guardarRegistro = function() {
             const form = document.getElementById('clinicForm');
-            if (!form.checkValidity()) { alert("⚠️ Completa los campos obligatorios"); return; }
+            if (!form.checkValidity()) { alert("⚠️ Por favor llena los campos obligatorios"); return; }
             
             const fd = new FormData(form);
             const nuevoID = Date.now().toString();
@@ -226,19 +174,17 @@
                 fecha: new Date().toLocaleString(),
                 nombre: fd.get('nombre').toUpperCase(),
                 edad: fd.get('edad'),
-                genero: fd.get('genero'),
-                telefono: fd.get('telefono') || 'S/N',
+                telefono: fd.get('telefono'),
                 colonia: fd.get('colonia'),
+                genero: fd.get('genero'),
                 presion: fd.get('presion'),
                 frecuencia: fd.get('frecuencia'),
                 temperatura: fd.get('temperatura'),
                 antecedentes: Array.from(fd.getAll('antecedente')),
-                mes_embarazo: fd.get('mes_embarazo') || "",
-                alergias: fd.get('alergias') || "",
-                motivo: fd.get('motivo') || "",
-                servicios_pref: Array.from(fd.getAll('servicio_pref')),
+                medicamentos: fd.get('medicamentos') || "Ninguno",
+                alergias: fd.get('alergias') || "Ninguna",
                 servicios_rec: Array.from(fd.getAll('servicio_rec')),
-                evolucion: "",
+                motivo: fd.get('motivo') || "",
                 borrado: false
             };
 
@@ -246,14 +192,11 @@
                 .then(() => {
                     form.reset();
                     document.getElementById('modal-success').classList.remove('hidden');
-                })
-                .catch(e => alert("Error al subir: " + e));
+                });
         };
 
-        // 2. Escuchar cambios en tiempo real (Sincronización Automática)
         function escucharDatos() {
-            const dbRef = ref(db, 'pacientes');
-            onValue(dbRef, (snapshot) => {
+            onValue(ref(db, 'pacientes'), (snapshot) => {
                 const data = snapshot.val();
                 dataGlobal = data ? Object.values(data) : [];
                 actualizarUI();
@@ -261,108 +204,68 @@
         }
 
         function actualizarUI() {
-            const containerActivos = document.getElementById('lista-pacientes');
-            const containerPapelera = document.getElementById('lista-papelera');
-            
             const activos = dataGlobal.filter(r => !r.borrado).reverse();
             const borrados = dataGlobal.filter(r => r.borrado).reverse();
 
-            containerActivos.innerHTML = activos.length ? activos.map(r => renderCard(r, false)).join('') : '<p class="text-center py-10 italic">No hay pacientes.</p>';
-            containerPapelera.innerHTML = borrados.length ? borrados.map(r => renderCard(r, true)).join('') : '<p class="text-center py-10 italic">Papelera vacía.</p>';
+            document.getElementById('lista-pacientes').innerHTML = activos.map(r => renderCard(r, false)).join('');
+            document.getElementById('lista-papelera').innerHTML = borrados.map(r => renderCard(r, true)).join('');
         }
 
         function renderCard(r, esPapelera) {
-            const tieneAlertas = (r.antecedentes && r.antecedentes.length > 0) || (r.alergias && r.alergias.trim() !== "");
             return `
-                <div class="bg-white p-5 rounded-2xl border-l-8 ${tieneAlertas ? 'border-red-500 bg-red-50/20' : 'border-emerald-500'} shadow-sm animate-pop">
+                <div class="bg-white p-5 rounded-2xl border-l-8 border-emerald-500 shadow-sm animate-pop">
                     <div class="flex justify-between items-start cursor-pointer" onclick="verDetalle('${r.id}')">
-                        <div class="flex-1 pr-10">
-                            <h3 class="font-bold text-slate-800 text-lg uppercase mb-1">${r.nombre} ${tieneAlertas ? '⚠️' : ''}</h3>
-                            <div class="text-[11px] font-bold uppercase text-slate-500">📞 TEL: ${r.telefono} • ${r.edad} AÑOS</div>
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-lg uppercase">${r.nombre}</h3>
+                            <div class="text-[11px] font-bold text-slate-500 uppercase">
+                                📞 ${r.telefono} | 🏠 COL: ${r.colonia} | 🎂 ${r.edad} AÑOS
+                            </div>
                         </div>
-                        <div class="text-right flex flex-col gap-2">
-                            <span class="text-[10px] text-slate-300">${r.fecha.split(',')[1] || ''}</span>
-                            ${esPapelera ? 
-                                `<button onclick="restaurarPaciente('${r.id}')" class="text-emerald-600 font-bold text-[10px]">RESTAURAR</button>` : 
-                                `<button onclick="moverAPapelera('${r.id}')" class="text-red-400">🗑️</button>`
-                            }
-                        </div>
+                        <button onclick="moverAPapelera('${r.id}', ${!esPapelera})" class="text-red-400">
+                            ${esPapelera ? '🔄' : '🗑️'}
+                        </button>
                     </div>
                 </div>`;
         }
 
-        // 3. Ver Detalle y Guardar Evolución
         window.verDetalle = function(id) {
             const r = dataGlobal.find(reg => reg.id === id);
-            if (!r) return;
-            
             const content = document.getElementById('detalle-content');
             content.innerHTML = `
-                <h2 class="text-2xl font-black uppercase">${r.nombre}</h2>
-                <p class="text-sm text-slate-500 mb-6">${r.colonia} | ${r.telefono}</p>
-                <div class="bg-emerald-50 p-4 rounded-xl">
-                    <p class="text-xs font-bold mb-2 uppercase">Seguimiento:</p>
-                    <textarea id="evolucion-texto" class="w-full p-3 rounded-lg text-sm h-32" placeholder="..."> ${r.evolucion || ''}</textarea>
-                </div>`;
-            
+                <h2 class="text-2xl font-black uppercase text-emerald-700">${r.nombre}</h2>
+                <div class="grid grid-cols-2 gap-4 mt-4 text-sm">
+                    <p><b>Edad:</b> ${r.edad}</p>
+                    <p><b>Tel:</b> ${r.telefono}</p>
+                    <p><b>Colonia:</b> ${r.colonia}</p>
+                    <p><b>Presión:</b> ${r.presion}</p>
+                </div>
+                <div class="mt-6 p-4 bg-orange-50 rounded-xl">
+                    <p class="font-bold text-orange-800">Medicamentos:</p>
+                    <p>${r.medicamentos}</p>
+                    <p class="font-bold text-orange-800 mt-2">Antecedentes:</p>
+                    <p>${r.antecedentes.join(', ') || 'Ninguno'}</p>
+                </div>
+                <div class="mt-4 p-4 bg-emerald-50 rounded-xl">
+                    <p class="font-bold text-emerald-800">Tratamiento Aplicado:</p>
+                    <p>${r.servicios_rec.join(', ')}</p>
+                    <p class="mt-2"><b>Observaciones:</b> ${r.motivo}</p>
+                </div>
+            `;
             document.getElementById('modal-detalle').classList.remove('hidden');
-            document.getElementById('btn-save-treatment').onclick = () => {
-                const texto = document.getElementById('evolucion-texto').value;
-                update(ref(db, 'pacientes/' + id), { evolucion: texto });
-                cerrarModal();
-            };
         };
 
-        // 4. Borrado lógico (Papelera)
-        window.moverAPapelera = function(id) {
-            update(ref(db, 'pacientes/' + id), { borrado: true });
+        window.moverAPapelera = function(id, estado) {
+            update(ref(db, 'pacientes/' + id), { borrado: estado });
         };
 
-        window.restaurarPaciente = function(id) {
-            update(ref(db, 'pacientes/' + id), { borrado: false });
-        };
-
-        // 5. Borrado físico (Definitivo)
-        window.vaciarPapelera = function() {
-            const aBorrar = dataGlobal.filter(r => r.borrado);
-            aBorrar.forEach(r => {
-                remove(ref(db, 'pacientes/' + r.id));
-            });
-        };
-
-        // --- FUNCIONES DE NAVEGACIÓN Y UI ---
-        window.switchTab = function(tab) {
+        window.switchTab = (tab) => {
             ['triage', 'consultas', 'papelera'].forEach(t => {
                 document.getElementById(`tab-${t}`).classList.toggle('hidden', t !== tab);
                 document.getElementById(`btn-${t}`).classList.toggle('tab-active', t === tab);
             });
         };
-
-        window.cerrarSuccess = function() { document.getElementById('modal-success').classList.add('hidden'); switchTab('consultas'); };
-        window.cerrarModal = function() { document.getElementById('modal-detalle').classList.add('hidden'); };
-        window.cerrarPassword = function() { document.getElementById('modal-password').classList.add('hidden'); };
-
-        window.solicitarPasswordModal = function(type) {
-            document.getElementById('modal-password').classList.remove('hidden');
-            document.getElementById('btn-validar-pass').onclick = () => {
-                if (document.getElementById('input-export-pass').value === EXPORT_PASSWORD) {
-                    cerrarPassword();
-                    if (type === 'vaciar') vaciarPapelera();
-                    if (type === 'export') procesarExportacion();
-                } else alert("Clave incorrecta");
-            };
-        };
-
-        function procesarExportacion() {
-            const activos = dataGlobal.filter(r => !r.borrado);
-            let csv = "\uFEFFFecha,Nombre,Edad,Antecedentes,Motivo,Evolucion\n";
-            activos.forEach(r => csv += `"${r.fecha}","${r.nombre}","${r.edad}","${(r.antecedentes||[]).join('|')}","${r.motivo}","${r.evolucion}"\n`);
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = `Reporte_Cloud_${new Date().toISOString().split('T')[0]}.csv`;
-            link.click();
-        }
+        window.cerrarSuccess = () => document.getElementById('modal-success').classList.add('hidden');
+        window.cerrarModal = () => document.getElementById('modal-detalle').classList.add('hidden');
     </script>
 </body>
 </html>
