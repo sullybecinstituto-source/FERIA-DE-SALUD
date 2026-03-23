@@ -93,11 +93,11 @@
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-slate-700 mb-1">Teléfono</label>
-                        <input type="tel" name="telefono" class="w-full border-slate-200 border-2 rounded-lg p-2.5 outline-none">
+                        <input type="tel" name="telefono" placeholder="Ej. 5512345678" class="w-full border-slate-200 border-2 rounded-lg p-2.5 outline-none focus:border-emerald-500">
                     </div>
                     <div class="md:col-span-1">
                         <label class="block text-sm font-semibold text-slate-700 mb-1">Colonia</label>
-                        <input type="text" name="colonia" required class="w-full border-slate-200 border-2 rounded-lg p-2.5 outline-none">
+                        <input type="text" name="colonia" required class="w-full border-slate-200 border-2 rounded-lg p-2.5 outline-none focus:border-emerald-500">
                     </div>
                 </div>
 
@@ -108,7 +108,7 @@
                     <input type="number" step="0.1" name="temperatura" placeholder="Temp (°C)" required class="border-2 p-2 rounded-lg outline-none focus:border-red-400">
                 </div>
 
-                <h2 class="section-title text-orange-600 border-orange-600">3. Antecedentes y Contraindicaciones</h2>
+                <h2 class="section-title text-orange-600 border-orange-600">3. Antecedentes</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
                     <div class="space-y-3">
                         <label class="checkbox-pill bg-white flex justify-between items-center border-orange-100">
@@ -120,35 +120,30 @@
                         </label>
                         <label class="checkbox-pill bg-white border-orange-100 text-sm"><input type="checkbox" name="antecedente" value="Hipertensión / Hipotensión" class="mr-2 h-4 w-4"><span>Hipertensión / Hipotensión</span></label>
                         <label class="checkbox-pill bg-white border-orange-100 text-sm"><input type="checkbox" name="antecedente" value="Diabetes" class="mr-2 h-4 w-4"><span>Diabetes</span></label>
-                        <label class="checkbox-pill bg-white border-orange-100 text-sm"><input type="checkbox" name="antecedente" value="Marcapasos / Implantes metálicos" class="mr-2 h-4 w-4"><span>Marcapasos / Implantes metálicos</span></label>
+                        <label class="checkbox-pill bg-white border-orange-100 text-sm"><input type="checkbox" name="antecedente" value="Marcapasos / Metales" class="mr-2 h-4 w-4"><span>Marcapasos / Implantes metálicos</span></label>
                     </div>
                     <div class="space-y-3">
-                        <label class="checkbox-pill bg-white border-orange-100 text-sm"><input type="checkbox" name="antecedente" value="Cirugía reciente (< 6 meses)" class="mr-2 h-4 w-4"><span>Cirugía reciente (< 6 meses)</span></label>
-                        <label class="checkbox-pill bg-white border-orange-100 text-sm"><input type="checkbox" name="antecedente" value="Heridas abiertas / Infecciones piel" class="mr-2 h-4 w-4"><span>Heridas abiertas / Infecciones piel</span></label>
+                        <label class="checkbox-pill bg-white border-orange-100 text-sm"><input type="checkbox" name="antecedente" value="Cirugía reciente" class="mr-2 h-4 w-4"><span>Cirugía reciente (< 6 meses)</span></label>
                         <div class="mt-2">
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Alergias (Aceites, metales, etc.):</label>
-                            <input type="text" name="alergias" placeholder="Especifique alergias..." class="w-full border-2 p-2 rounded-lg text-sm outline-none focus:border-emerald-500">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Alergias:</label>
+                            <input type="text" name="alergias" placeholder="Especifique..." class="w-full border-2 p-2 rounded-lg text-sm outline-none focus:border-emerald-500">
                         </div>
                         <div class="mt-2">
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Toma algún medicamento:</label>
-                            <input type="text" name="medicamentos" placeholder="Nombre de medicamentos..." class="w-full border-2 p-2 rounded-lg text-sm outline-none focus:border-emerald-500">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Medicamentos:</label>
+                            <input type="text" name="medicamentos" placeholder="Qué medicamentos toma..." class="w-full border-2 p-2 rounded-lg text-sm outline-none focus:border-emerald-500">
                         </div>
                     </div>
                 </div>
 
-                <h2 class="section-title">4. Motivo y Notas Iniciales</h2>
-                <textarea name="motivo" rows="2" placeholder="¿Cuál es el motivo de su consulta?" class="w-full border-2 p-2 rounded-lg mb-4 text-base outline-none focus:border-emerald-500"></textarea>
-                <textarea name="notas_adicionales" rows="2" placeholder="Notas de Triage (Observaciones rápidas)..." class="w-full border-2 p-2 rounded-lg bg-blue-50/30 text-base outline-none focus:border-blue-500"></textarea>
+                <h2 class="section-title">4. Motivo de Consulta</h2>
+                <textarea name="motivo" rows="3" placeholder="¿Cuál es el motivo de su visita hoy?" class="w-full border-2 p-3 rounded-lg mb-4 text-base outline-none focus:border-emerald-500 bg-slate-50/30"></textarea>
 
                 <h2 class="section-title">5. Servicios</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- SERVICIO PREFIERE -->
                     <div class="p-5 border rounded-xl bg-emerald-50 border-emerald-100">
                         <p class="text-xs font-bold mb-4 text-emerald-800 uppercase italic">Servicios que prefiere:</p>
                         <div id="pref-list" class="grid grid-cols-1 gap-2"></div>
                     </div>
-
-                    <!-- SERVICIO RECIBIDO -->
                     <div class="p-5 border rounded-xl bg-blue-50 border-blue-100">
                         <p class="text-xs font-bold mb-4 text-blue-800 uppercase italic">Servicios aplicados en área:</p>
                         <div id="rec-list" class="grid grid-cols-1 gap-2"></div>
@@ -163,9 +158,19 @@
 
         <!-- PESTAÑA 2: CONSULTAS -->
         <section id="tab-consultas" class="hidden">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-slate-800">Lista de Pacientes</h2>
-                <button onclick="actualizarListas()" class="text-emerald-600 font-bold text-sm bg-white px-4 py-2 rounded-xl border shadow-sm active:scale-95">🔄 Actualizar</button>
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800">Lista de Pacientes</h2>
+                    <p class="text-xs text-slate-500">Información en tiempo real de la feria</p>
+                </div>
+                <div class="flex gap-2 w-full md:w-auto">
+                    <button onclick="exportarExcel()" class="flex-1 md:flex-none bg-emerald-100 text-emerald-700 font-bold text-sm px-4 py-3 rounded-xl border border-emerald-200 shadow-sm active:scale-95">
+                        📊 Exportar Excel (CSV)
+                    </button>
+                    <button onclick="actualizarListas()" class="bg-white text-slate-600 font-bold text-sm px-4 py-3 rounded-xl border shadow-sm active:scale-95">
+                        🔄 Actualizar
+                    </button>
+                </div>
             </div>
             <div id="lista-pacientes" class="grid grid-cols-1 gap-4"></div>
         </section>
@@ -174,20 +179,20 @@
         <section id="tab-papelera" class="hidden">
             <div class="mb-6 border-b pb-4">
                 <h2 class="text-2xl font-bold text-slate-600">Papelera de Reciclaje</h2>
-                <p class="text-xs text-slate-400 mt-1">Aquí se guardan los pacientes eliminados temporalmente.</p>
+                <p class="text-xs text-slate-400 mt-1">Pacientes eliminados. Se pueden recuperar antes de cerrar la sesión.</p>
             </div>
             <div id="lista-papelera" class="grid grid-cols-1 gap-4"></div>
         </section>
     </div>
 
-    <!-- MODAL DETALLE Y TRATAMIENTO TERAPEUTA -->
+    <!-- MODAL DETALLE -->
     <div id="modal-detalle" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-2 sm:p-4">
         <div class="bg-white w-full max-w-2xl rounded-3xl max-h-[95vh] overflow-hidden flex flex-col relative shadow-2xl">
             <button onclick="cerrarModal()" class="absolute top-4 right-4 text-4xl text-slate-300 hover:text-slate-500">&times;</button>
             <div id="detalle-content" class="overflow-y-auto p-6 flex-1"></div>
             <div class="p-6 bg-slate-50 border-t flex gap-3">
                 <button onclick="cerrarModal()" class="flex-1 bg-slate-200 text-slate-700 py-4 rounded-2xl font-bold uppercase text-sm">Cerrar</button>
-                <button id="btn-save-treatment" class="flex-1 bg-emerald-600 text-white py-4 rounded-2xl font-bold uppercase text-sm shadow-md hover:bg-emerald-700">Guardar Evolución</button>
+                <button id="btn-save-treatment" class="flex-1 bg-emerald-600 text-white py-4 rounded-2xl font-bold uppercase text-sm shadow-md hover:bg-emerald-700">Guardar Seguimiento</button>
             </div>
         </div>
     </div>
@@ -197,7 +202,7 @@
         <div class="bg-white p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl">
             <div class="text-5xl mb-4">🗑️</div>
             <h3 class="text-xl font-bold mb-2">¿Mover a papelera?</h3>
-            <p class="text-slate-500 text-sm mb-6">El paciente podrá ser recuperado desde la pestaña de Papelera.</p>
+            <p class="text-slate-500 text-sm mb-6">El paciente no se borrará definitivamente, irá a la pestaña de Papelera.</p>
             <div class="flex gap-4">
                 <button onclick="cerrarConfirm()" class="flex-1 py-3 border rounded-xl font-bold text-slate-500">Cancelar</button>
                 <button id="confirm-delete-btn" class="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold shadow-lg">Mover</button>
@@ -227,14 +232,12 @@
         function renderServicios() {
             const prefContainer = document.getElementById('pref-list');
             const recContainer = document.getElementById('rec-list');
-            
             const html = SERVICIOS.map(s => `
                 <label class="checkbox-pill bg-white">
                     <input type="checkbox" name="servicio_X" value="${s}" class="mr-3 h-5 w-5">
                     <span class="text-base">${s}</span>
                 </label>
             `);
-
             prefContainer.innerHTML = html.map(h => h.replace('servicio_X', 'servicio_pref')).join('');
             recContainer.innerHTML = html.map(h => h.replace('servicio_X', 'servicio_rec')).join('');
         }
@@ -251,7 +254,7 @@
         function guardarRegistro() {
             const form = document.getElementById('clinicForm');
             if (!form.checkValidity()) {
-                alert("Complete los datos obligatorios.");
+                alert("Por favor, llena los campos obligatorios marcados.");
                 return;
             }
 
@@ -262,6 +265,7 @@
                 nombre: fd.get('nombre').toUpperCase(),
                 edad: fd.get('edad'),
                 genero: fd.get('genero'),
+                telefono: fd.get('telefono') || 'S/N',
                 colonia: fd.get('colonia'),
                 presion: fd.get('presion'),
                 frecuencia: fd.get('frecuencia'),
@@ -271,7 +275,6 @@
                 alergias: fd.get('alergias'),
                 medicamentos: fd.get('medicamentos'),
                 motivo: fd.get('motivo'),
-                notas: fd.get('notas_adicionales'),
                 servicios_pref: Array.from(fd.getAll('servicio_pref')),
                 servicios_rec: Array.from(fd.getAll('servicio_rec')),
                 evolucion: "",
@@ -282,7 +285,7 @@
             registros.unshift(registro);
             localStorage.setItem('feria_registros', JSON.stringify(registros));
 
-            alert("✅ Registro guardado.");
+            alert("✅ Paciente registrado correctamente.");
             form.reset();
             switchTab('consultas');
         }
@@ -296,32 +299,32 @@
             const borrados = registros.filter(r => r.borrado);
 
             containerActivos.innerHTML = activos.length ? activos.map(r => renderCard(r, false)).join('') : '<p class="text-center text-slate-400 py-10 italic">No hay pacientes activos.</p>';
-            containerPapelera.innerHTML = borrados.length ? borrados.map(r => renderCard(r, true)).join('') : '<p class="text-center text-slate-400 py-10 italic">La papelera está vacía.</p>';
+            containerPapelera.innerHTML = borrados.length ? borrados.map(r => renderCard(r, true)).join('') : '<p class="text-center text-slate-400 py-10 italic">Papelera vacía.</p>';
         }
 
         function renderCard(r, esPapelera) {
             const alerta = r.antecedentes.length > 0 || r.alergias;
             return `
-                <div class="bg-white p-5 rounded-2xl border-l-8 ${alerta ? 'border-red-500 bg-red-50/20' : 'border-emerald-500'} shadow-sm relative group overflow-hidden">
+                <div class="bg-white p-5 rounded-2xl border-l-8 ${alerta ? 'border-red-500 bg-red-50/20' : 'border-emerald-500'} shadow-sm relative group">
                     <div class="flex justify-between items-start cursor-pointer" onclick="verDetalle(${r.id})">
                         <div class="flex-1 pr-10">
                             <h3 class="font-bold text-slate-800 text-lg uppercase leading-tight mb-1">${r.nombre}</h3>
-                            <div class="flex gap-3 text-xs text-slate-500 font-bold uppercase tracking-widest">
-                                <span>${r.edad} AÑOS</span>
-                                <span>•</span>
-                                <span>${r.colonia}</span>
+                            <div class="flex flex-wrap gap-x-3 gap-y-1 text-[11px] font-bold uppercase tracking-wide">
+                                <span class="text-emerald-600">📞 TEL: ${r.telefono}</span>
+                                <span class="text-slate-400">•</span>
+                                <span class="text-slate-500">${r.edad} AÑOS</span>
+                                <span class="text-slate-400">•</span>
+                                <span class="text-slate-500">${r.colonia}</span>
                             </div>
                         </div>
                         <div class="text-right">
-                            <span class="text-[10px] block font-black text-slate-400 mb-1">${r.fecha.split(',')[1]}</span>
+                            <span class="text-[10px] block font-black text-slate-300 mb-1">${r.fecha.split(',')[1]}</span>
                             ${esPapelera ? 
-                                `<button onclick="restaurarPaciente(${r.id})" class="text-emerald-600 text-xs font-bold border border-emerald-200 px-2 py-1 rounded-lg bg-emerald-50">RESTAURAR</button>` : 
-                                `<button onclick="prepararBorrado(event, ${r.id})" class="text-slate-300 hover:text-red-500 text-xl">🗑️</button>`
+                                `<button onclick="restaurarPaciente(${r.id})" class="text-emerald-600 text-[10px] font-black border border-emerald-200 px-2 py-1 rounded bg-emerald-50">RESTAURAR</button>` : 
+                                `<button onclick="prepararBorrado(event, ${r.id})" class="text-slate-200 hover:text-red-400 text-xl transition-colors">🗑️</button>`
                             }
                         </div>
                     </div>
-                    ${alerta ? `<div class="mt-3 text-[10px] font-black text-red-600 uppercase bg-red-100/50 p-1 inline-block rounded">⚠️ ALERTA MÉDICA</div>` : ''}
-                    ${r.evolucion ? `<div class="mt-2 text-[11px] text-emerald-700 italic border-t pt-2">✓ Sesión con seguimiento</div>` : ''}
                 </div>
             `;
         }
@@ -337,25 +340,22 @@
             content.innerHTML = `
                 <div class="mb-6">
                     <h2 class="text-3xl font-black text-slate-800 uppercase leading-none">${r.nombre}</h2>
-                    <p class="text-slate-400 font-bold mt-2 uppercase text-sm">${r.genero} | ${r.edad} AÑOS | ${r.colonia}</p>
+                    <p class="text-emerald-600 font-bold mt-2 text-lg">📞 Teléfono: ${r.telefono}</p>
+                    <p class="text-slate-400 font-bold uppercase text-xs">${r.genero} | ${r.edad} AÑOS | ${r.colonia}</p>
                 </div>
-                <div class="grid grid-cols-3 gap-2 mb-8 text-center font-black">
-                    <div class="bg-red-50 p-3 rounded-2xl"><p class="text-[10px] text-red-400">P.A.</p><p class="text-xl text-red-700">${r.presion}</p></div>
-                    <div class="bg-red-50 p-3 rounded-2xl"><p class="text-[10px] text-red-400">PULSO</p><p class="text-xl text-red-700">${r.frecuencia}</p></div>
-                    <div class="bg-red-50 p-3 rounded-2xl"><p class="text-[10px] text-red-400">TEMP</p><p class="text-xl text-red-700">${r.temperatura}°</p></div>
+                <div class="grid grid-cols-3 gap-2 mb-6 text-center font-black">
+                    <div class="bg-red-50 p-3 rounded-2xl"><p class="text-[9px] text-red-400 uppercase">P. Arterial</p><p class="text-xl text-red-700">${r.presion}</p></div>
+                    <div class="bg-red-50 p-3 rounded-2xl"><p class="text-[9px] text-red-400 uppercase">Pulso</p><p class="text-xl text-red-700">${r.frecuencia}</p></div>
+                    <div class="bg-red-50 p-3 rounded-2xl"><p class="text-[9px] text-red-400 uppercase">Temp</p><p class="text-xl text-red-700">${r.temperatura}°</p></div>
                 </div>
                 <div class="space-y-4">
-                    <div class="${r.antecedentes.length > 0 || r.alergias ? 'bg-orange-100 p-4 rounded-2xl border border-orange-200' : 'hidden'}">
-                        <p class="text-[10px] font-black text-orange-700 uppercase">⚠️ Antecedentes:</p>
-                        <p class="font-bold text-orange-900">${r.antecedentes.join(', ').toUpperCase()}</p>
+                    <div class="bg-blue-50 p-5 rounded-2xl border border-blue-100">
+                        <p class="text-[10px] font-black text-blue-700 uppercase mb-2">Motivo de Consulta:</p>
+                        <p class="text-base font-medium text-blue-900">${r.motivo || 'No especificado'}</p>
                     </div>
-                    <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
-                        <p class="text-[10px] font-black text-blue-700 uppercase">Motivo:</p>
-                        <p class="text-base font-medium text-blue-900">${r.motivo || 'N/A'}</p>
-                    </div>
-                    <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200">
-                        <p class="text-[10px] font-black text-emerald-700 uppercase mb-2">Seguimiento Terapeuta:</p>
-                        <textarea id="evolucion-texto" rows="5" class="w-full p-3 rounded-xl border-none outline-none text-sm">${r.evolucion || ''}</textarea>
+                    <div class="bg-emerald-50 p-5 rounded-3xl border-2 border-emerald-100">
+                        <p class="text-xs font-black text-emerald-700 uppercase mb-3 flex items-center">📝 SEGUIMIENTO DEL TERAPEUTA:</p>
+                        <textarea id="evolucion-texto" rows="6" class="w-full p-4 rounded-xl border-none outline-none text-base shadow-inner bg-white" placeholder="Describe el tratamiento realizado en esta sesión...">${r.evolucion || ''}</textarea>
                     </div>
                 </div>
             `;
@@ -374,6 +374,48 @@
                 cerrarModal();
                 actualizarListas();
             }
+        }
+
+        function exportarExcel() {
+            const registros = JSON.parse(localStorage.getItem('feria_registros') || '[]');
+            if (registros.length === 0) {
+                alert("No hay datos para exportar.");
+                return;
+            }
+
+            // Cabeceras del CSV actualizadas
+            let csv = "Fecha,Nombre,Edad,Genero,Telefono,Colonia,Presion Arterial,Frecuencia Cardiaca,Temperatura,Antecedentes,Alergias,Motivo,Servicios Preferidos,Servicios Aplicados,Evolucion Terapeuta\n";
+            
+            registros.forEach(r => {
+                const fila = [
+                    `"${r.fecha}"`,
+                    `"${r.nombre}"`,
+                    `"${r.edad}"`,
+                    `"${r.genero}"`,
+                    `"${r.telefono}"`,
+                    `"${r.colonia}"`,
+                    `"${r.presion}"`,
+                    `"${r.frecuencia}"`,
+                    `"${r.temperatura}"`,
+                    `"${r.antecedentes.join(' | ')}"`,
+                    `"${r.alergias || 'Ninguna'}"`,
+                    `"${r.motivo.replace(/"/g, '""').replace(/\n/g, ' ')}"`,
+                    `"${r.servicios_pref.join(' | ')}"`,
+                    `"${r.servicios_rec.join(' | ')}"`,
+                    `"${r.evolucion.replace(/"/g, '""').replace(/\n/g, ' ')}"`
+                ];
+                csv += fila.join(",") + "\n";
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Reporte_Feria_Salud_${new Date().toLocaleDateString()}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         function prepararBorrado(e, id) {
@@ -399,6 +441,7 @@
                 registros[idx].borrado = false;
                 localStorage.setItem('feria_registros', JSON.stringify(registros));
                 actualizarListas();
+                alert("Paciente restaurado.");
             }
         }
 
