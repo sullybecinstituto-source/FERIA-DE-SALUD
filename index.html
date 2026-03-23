@@ -534,6 +534,30 @@
         document.getElementById('input-export-pass').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') document.getElementById('btn-validar-pass').click();
         });
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // CONFIGURACIÓN DE TU FERIA
+        const firebaseConfig = {
+            apiKey: "AIzaSyAdeZG8-SX37MVIa2HcH_MRlPyu1eRrd-U",
+            authDomain: "feriadesaludsullybec.firebaseapp.com",
+            databaseURL: "https://feriadesaludsullybec-default-rtdb.firebaseio.com",
+            projectId: "feriadesaludsullybec",
+            storageBucket: "feriadesaludsullybec.firebasestorage.app",
+            messagingSenderId: "223306485224",
+            appId: "1:223306485224:web:00fd9103e788e7a362a85d"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const dbRef = ref(db, 'registros');
+
+        // Aquí van tus funciones de SullyBec (guardar, verDetalle, etc.)
+        // Recuerda que ahora deben empezar con "window." 
+        // Ejemplo: window.guardarRegistro = function() { ... }
+        
+        // ... (el resto del código que te pasé antes)
     </script>
 </body>
 </html>
