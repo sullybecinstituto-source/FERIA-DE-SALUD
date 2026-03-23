@@ -63,6 +63,15 @@
         .animate-pop {
             animation: popIn 0.3s ease-out forwards;
         }
+        /* Estilo para alerta de contraindicaciones */
+        .alerta-contraindicacion {
+            animation: blink 2s infinite;
+            border: 2px solid #ef4444;
+        }
+        @keyframes blink {
+            0%, 100% { background-color: #fef2f2; }
+            50% { background-color: #fee2e2; }
+        }
     </style>
 </head>
 <body class="pb-20">
@@ -133,7 +142,7 @@
                     <input type="number" step="0.1" name="temperatura" placeholder="Temp (°C)" required class="border-2 p-2 rounded-lg outline-none focus:border-red-400">
                 </div>
 
-                <h2 class="section-title text-orange-600 border-orange-600">3. Antecedentes</h2>
+                <h2 class="section-title text-orange-600 border-orange-600">3. Antecedentes (Contraindicaciones)</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
                     <div class="space-y-3">
                         <label class="checkbox-pill bg-white flex justify-between items-center border-orange-100">
@@ -204,13 +213,13 @@
         <section id="tab-papelera" class="hidden">
             <div class="mb-6 border-b pb-4">
                 <h2 class="text-2xl font-bold text-slate-600">Papelera de Reciclaje</h2>
-                <p class="text-xs text-slate-400 mt-1">Pacientes eliminados temporalmente. Los registros aquí no aparecerán en el reporte Excel.</p>
+                <p class="text-xs text-slate-400 mt-1">Pacientes eliminados temporalmente.</p>
             </div>
             <div id="lista-papelera" class="grid grid-cols-1 gap-4"></div>
         </section>
     </div>
 
-    <!-- MODAL DE ÉXITO (GUARDADO) -->
+    <!-- MODALES -->
     <div id="modal-success" class="hidden fixed inset-0 bg-black/70 z-[300] flex items-center justify-center p-6">
         <div class="bg-white p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl animate-pop border-b-8 border-emerald-500">
             <div class="flex justify-center mb-4">
@@ -218,19 +227,14 @@
             </div>
             <div class="text-6xl mb-4">✅</div>
             <h3 class="text-2xl font-black text-slate-800 mb-2 uppercase">¡Registro Exitoso!</h3>
-            <p class="text-slate-500 text-sm mb-8">La información del paciente ha sido almacenada correctamente en el sistema.</p>
-            <button onclick="cerrarSuccess()" class="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold shadow-lg uppercase tracking-wider hover:bg-emerald-700 transition-colors">
-                Continuar
-            </button>
+            <p class="text-slate-500 text-sm mb-8">Información almacenada correctamente.</p>
+            <button onclick="cerrarSuccess()" class="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold shadow-lg uppercase tracking-wider hover:bg-emerald-700">Continuar</button>
         </div>
     </div>
 
-    <!-- MODAL DE CONTRASEÑA (MULTIUSO) -->
     <div id="modal-password" class="hidden fixed inset-0 bg-black/70 z-[200] flex items-center justify-center p-6">
         <div class="bg-white p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl animate-pop">
-            <div class="text-5xl mb-4">🔐</div>
             <h3 id="password-modal-title" class="text-xl font-bold mb-2">Acceso Protegido</h3>
-            <p id="password-modal-desc" class="text-slate-500 text-sm mb-6">Ingresa la clave de administrador.</p>
             <input type="password" id="input-export-pass" placeholder="Contraseña" class="w-full border-2 p-3 rounded-xl mb-6 text-center text-lg outline-none focus:border-emerald-500">
             <div class="flex gap-4">
                 <button onclick="cerrarPassword()" class="flex-1 py-3 border rounded-xl font-bold text-slate-500">Cancelar</button>
@@ -239,10 +243,9 @@
         </div>
     </div>
 
-    <!-- MODAL DETALLE -->
     <div id="modal-detalle" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-2 sm:p-4">
         <div class="bg-white w-full max-w-2xl rounded-3xl max-h-[95vh] overflow-hidden flex flex-col relative shadow-2xl animate-pop">
-            <button onclick="cerrarModal()" class="absolute top-4 right-4 text-4xl text-slate-300 hover:text-slate-500">&times;</button>
+            <button onclick="cerrarModal()" class="absolute top-4 right-4 text-4xl text-slate-300 hover:text-slate-500 z-10">&times;</button>
             <div id="detalle-content" class="overflow-y-auto p-6 flex-1"></div>
             <div class="p-6 bg-slate-50 border-t flex gap-3">
                 <button onclick="cerrarModal()" class="flex-1 bg-slate-200 text-slate-700 py-4 rounded-2xl font-bold uppercase text-sm">Cerrar</button>
@@ -251,12 +254,10 @@
         </div>
     </div>
 
-    <!-- MODAL CONFIRMACIÓN MOVER A PAPELERA -->
     <div id="modal-confirm" class="hidden fixed inset-0 bg-black/50 z-[110] flex items-center justify-center p-6">
         <div class="bg-white p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl animate-pop">
             <div class="text-5xl mb-4">🗑️</div>
             <h3 class="text-xl font-bold mb-2">¿Mover a papelera?</h3>
-            <p class="text-slate-500 text-sm mb-6">El paciente se moverá a la sección de Papelera.</p>
             <div class="flex gap-4">
                 <button onclick="cerrarConfirm()" class="flex-1 py-3 border rounded-xl font-bold text-slate-500">Cancelar</button>
                 <button id="confirm-delete-btn" class="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold shadow-lg">Mover</button>
@@ -265,27 +266,12 @@
     </div>
 
     <script>
-        // CONFIGURACIÓN DE SEGURIDAD
         const EXPORT_PASSWORD = "Sully2026"; 
-
-        const SERVICIOS = [
-            "Masaje Terapéutico",
-            "Acupuntura",
-            "Ventosas",
-            "Quiropráctica",
-            "Desintoxicación Iónica",
-            "Nutrición",
-            "Biomagnetismo",
-            "Corte de Cabello"
-        ];
-
+        const SERVICIOS = ["Masaje Terapéutico", "Acupuntura", "Ventosas", "Quiropráctica", "Desintoxicación Iónica", "Nutrición", "Biomagnetismo", "Corte de Cabello"];
         let pacienteSeleccionadoId = null;
-        let pendingActionType = null; // 'export' o 'delete_permanent'
+        let pendingActionType = null;
 
-        window.onload = () => {
-            renderServicios();
-            actualizarListas();
-        };
+        window.onload = () => { renderServicios(); actualizarListas(); };
 
         function renderServicios() {
             const prefContainer = document.getElementById('pref-list');
@@ -309,26 +295,12 @@
             actualizarListas();
         }
 
-        function mostrarSuccess() {
-            document.getElementById('modal-success').classList.remove('hidden');
-        }
-
-        function cerrarSuccess() {
-            document.getElementById('modal-success').classList.add('hidden');
-            switchTab('consultas');
-        }
-
         function guardarRegistro() {
             const form = document.getElementById('clinicForm');
             if (!form.checkValidity()) {
-                const toast = document.createElement("div");
-                toast.className = "fixed bottom-5 left-1/2 -translate-x-1/2 bg-red-600 text-white px-6 py-3 rounded-full font-bold shadow-xl z-[300] animate-pop";
-                toast.innerText = "⚠️ Completa los campos obligatorios";
-                document.body.appendChild(toast);
-                setTimeout(() => toast.remove(), 3000);
+                alert("⚠️ Completa los campos obligatorios");
                 return;
             }
-
             const fd = new FormData(form);
             const registro = {
                 id: Date.now(),
@@ -351,51 +323,39 @@
                 evolucion: "",
                 borrado: false
             };
-
             let registros = JSON.parse(localStorage.getItem('feria_registros') || '[]');
             registros.unshift(registro);
             localStorage.setItem('feria_registros', JSON.stringify(registros));
-
             form.reset();
-            mostrarSuccess();
+            document.getElementById('modal-success').classList.remove('hidden');
         }
+
+        function cerrarSuccess() { document.getElementById('modal-success').classList.add('hidden'); switchTab('consultas'); }
 
         function actualizarListas() {
             const registros = JSON.parse(localStorage.getItem('feria_registros') || '[]');
             const containerActivos = document.getElementById('lista-pacientes');
             const containerPapelera = document.getElementById('lista-papelera');
-
             const activos = registros.filter(r => !r.borrado);
             const borrados = registros.filter(r => r.borrado);
-
-            containerActivos.innerHTML = activos.length ? activos.map(r => renderCard(r, false)).join('') : '<p class="text-center text-slate-400 py-10 italic">No hay pacientes activos.</p>';
-            containerPapelera.innerHTML = borrados.length ? borrados.map(r => renderCard(r, true)).join('') : '<p class="text-center text-slate-400 py-10 italic">Papelera vacía.</p>';
+            containerActivos.innerHTML = activos.length ? activos.map(r => renderCard(r, false)).join('') : '<p class="text-center py-10 italic">No hay pacientes activos.</p>';
+            containerPapelera.innerHTML = borrados.length ? borrados.map(r => renderCard(r, true)).join('') : '<p class="text-center py-10 italic">Papelera vacía.</p>';
         }
 
         function renderCard(r, esPapelera) {
-            const alerta = r.antecedentes.length > 0 || r.alergias;
+            const tieneAlertas = r.antecedentes.length > 0 || (r.alergias && r.alergias.trim() !== "");
             return `
-                <div class="bg-white p-5 rounded-2xl border-l-8 ${alerta ? 'border-red-500 bg-red-50/20' : 'border-emerald-500'} shadow-sm relative group animate-pop">
+                <div class="bg-white p-5 rounded-2xl border-l-8 ${tieneAlertas ? 'border-red-500 bg-red-50/20' : 'border-emerald-500'} shadow-sm relative animate-pop">
                     <div class="flex justify-between items-start cursor-pointer" onclick="verDetalle(${r.id})">
                         <div class="flex-1 pr-10">
-                            <h3 class="font-bold text-slate-800 text-lg uppercase leading-tight mb-1">${r.nombre}</h3>
-                            <div class="flex flex-wrap gap-x-3 gap-y-1 text-[11px] font-bold uppercase tracking-wide">
-                                <span class="text-emerald-600">📞 TEL: ${r.telefono}</span>
-                                <span class="text-slate-400">•</span>
-                                <span class="text-slate-500">${r.edad} AÑOS</span>
-                                <span class="text-slate-400">•</span>
-                                <span class="text-slate-500">${r.colonia}</span>
+                            <h3 class="font-bold text-slate-800 text-lg uppercase mb-1">${r.nombre} ${tieneAlertas ? '⚠️' : ''}</h3>
+                            <div class="text-[11px] font-bold uppercase tracking-wide text-slate-500">
+                                📞 TEL: ${r.telefono} • ${r.edad} AÑOS • ${r.colonia}
                             </div>
                         </div>
-                        <div class="text-right flex flex-col items-end gap-2">
-                            <span class="text-[10px] block font-black text-slate-300 mb-1">${r.fecha.split(',')[1]}</span>
-                            ${esPapelera ? 
-                                `<div class="flex gap-1">
-                                    <button onclick="event.stopPropagation(); restaurarPaciente(${r.id})" class="text-emerald-600 text-[9px] font-black border border-emerald-200 px-2 py-1.5 rounded bg-emerald-50 hover:bg-emerald-100 uppercase tracking-tighter">Restaurar</button>
-                                    <button onclick="event.stopPropagation(); solicitarPasswordModal('delete_permanent', ${r.id})" class="text-white text-[9px] font-black px-2 py-1.5 rounded bg-red-500 hover:bg-red-600 uppercase tracking-tighter">Eliminar Permanente</button>
-                                </div>` : 
-                                `<button onclick="prepararBorrado(event, ${r.id})" class="text-slate-200 hover:text-red-400 text-xl transition-colors">🗑️</button>`
-                            }
+                        <div class="text-right">
+                            <span class="text-[10px] block text-slate-300">${r.fecha.split(',')[1]}</span>
+                            ${esPapelera ? `<button onclick="event.stopPropagation(); restaurarPaciente(${r.id})" class="text-emerald-600 text-[10px] border px-2 py-1 rounded">Restaurar</button>` : `<button onclick="prepararBorrado(event, ${r.id})" class="text-slate-200 hover:text-red-400">🗑️</button>`}
                         </div>
                     </div>
                 </div>
@@ -406,30 +366,48 @@
             const registros = JSON.parse(localStorage.getItem('feria_registros') || '[]');
             const r = registros.find(reg => reg.id === id);
             if (!r) return;
-
             pacienteSeleccionadoId = id;
-            const content = document.getElementById('detalle-content');
+            
+            const tieneContraindicaciones = r.antecedentes.length > 0 || (r.alergias && r.alergias.trim() !== "");
+            let htmlAlertas = "";
+            
+            if (tieneContraindicaciones) {
+                htmlAlertas = `
+                    <div class="alerta-contraindicacion p-5 rounded-2xl mb-6 shadow-md">
+                        <div class="flex items-center gap-3 text-red-700 font-black text-xl mb-3">
+                            <span>🚨</span>
+                            <h4 class="uppercase tracking-tighter">CONTRAINDICACIONES DETECTADAS</h4>
+                        </div>
+                        <div class="grid grid-cols-1 gap-2">
+                            ${r.antecedentes.map(ant => `<div class="bg-red-600 text-white px-3 py-2 rounded-lg font-bold text-sm uppercase">🚫 ${ant}</div>`).join('')}
+                            ${r.alergias ? `<div class="bg-orange-600 text-white px-3 py-2 rounded-lg font-bold text-sm uppercase">⚠️ ALERGIAS: ${r.alergias}</div>` : ''}
+                            ${r.mes_embarazo ? `<div class="bg-purple-600 text-white px-3 py-2 rounded-lg font-bold text-sm uppercase">🤰 MES: ${r.mes_embarazo}</div>` : ''}
+                        </div>
+                        <p class="mt-4 text-red-800 text-xs font-bold text-center italic">⚠️ POR FAVOR, EVALÚE LA SEGURIDAD ANTES DE APLICAR CUALQUIER TERAPIA.</p>
+                    </div>
+                `;
+            }
 
+            const content = document.getElementById('detalle-content');
             content.innerHTML = `
+                ${htmlAlertas}
                 <div class="mb-6">
-                    <h2 class="text-3xl font-black text-slate-800 uppercase leading-none">${r.nombre}</h2>
-                    <p class="text-emerald-600 font-bold mt-2 text-lg">📞 Teléfono: ${r.telefono}</p>
+                    <h2 class="text-3xl font-black text-slate-800 uppercase">${r.nombre}</h2>
+                    <p class="text-emerald-600 font-bold">📞 Teléfono: ${r.telefono}</p>
                     <p class="text-slate-400 font-bold uppercase text-xs">${r.genero} | ${r.edad} AÑOS | ${r.colonia}</p>
                 </div>
                 <div class="grid grid-cols-3 gap-2 mb-6 text-center font-black">
-                    <div class="bg-red-50 p-3 rounded-2xl"><p class="text-[9px] text-red-400 uppercase">P. Arterial</p><p class="text-xl text-red-700">${r.presion}</p></div>
+                    <div class="bg-red-50 p-3 rounded-2xl"><p class="text-[9px] text-red-400 uppercase">P. Art</p><p class="text-xl text-red-700">${r.presion}</p></div>
                     <div class="bg-red-50 p-3 rounded-2xl"><p class="text-[9px] text-red-400 uppercase">Pulso</p><p class="text-xl text-red-700">${r.frecuencia}</p></div>
                     <div class="bg-red-50 p-3 rounded-2xl"><p class="text-[9px] text-red-400 uppercase">Temp</p><p class="text-xl text-red-700">${r.temperatura}°</p></div>
                 </div>
-                <div class="space-y-4">
-                    <div class="bg-blue-50 p-5 rounded-2xl border border-blue-100">
-                        <p class="text-[10px] font-black text-blue-700 uppercase mb-2">Motivo de Consulta:</p>
-                        <p class="text-base font-medium text-blue-900">${r.motivo || 'No especificado'}</p>
-                    </div>
-                    <div class="bg-emerald-50 p-5 rounded-3xl border-2 border-emerald-100">
-                        <p class="text-xs font-black text-emerald-700 uppercase mb-3 flex items-center">📝 SEGUIMIENTO DEL TERAPEUTA:</p>
-                        <textarea id="evolucion-texto" rows="6" class="w-full p-4 rounded-xl border-none outline-none text-base shadow-inner bg-white" placeholder="Describe el tratamiento realizado en esta sesión...">${r.evolucion || ''}</textarea>
-                    </div>
+                <div class="bg-blue-50 p-5 rounded-2xl border mb-4">
+                    <p class="text-[10px] font-black text-blue-700 uppercase mb-2">Motivo de Consulta:</p>
+                    <p class="text-base font-medium text-blue-900">${r.motivo || 'No especificado'}</p>
+                </div>
+                <div class="bg-emerald-50 p-5 rounded-3xl border-2 border-emerald-100">
+                    <p class="text-xs font-black text-emerald-700 uppercase mb-3">📝 SEGUIMIENTO DEL TERAPEUTA:</p>
+                    <textarea id="evolucion-texto" rows="6" class="w-full p-4 rounded-xl outline-none text-base bg-white" placeholder="Describe el tratamiento realizado...">${r.evolucion || ''}</textarea>
                 </div>
             `;
             document.getElementById('modal-detalle').classList.remove('hidden');
@@ -448,110 +426,33 @@
             }
         }
 
-        // --- LÓGICA DE CONTRASEÑA MULTIUSO ---
         function solicitarPasswordModal(type, id = null) {
-            pendingActionType = type;
-            pacienteSeleccionadoId = id;
-            
-            const modal = document.getElementById('modal-password');
-            const title = document.getElementById('password-modal-title');
-            const desc = document.getElementById('password-modal-desc');
-            
-            if (type === 'export') {
-                title.innerText = "Exportar Reporte";
-                desc.innerText = "Ingresa la clave para descargar el archivo Excel.";
-            } else if (type === 'delete_permanent') {
-                title.innerText = "Borrado Permanente";
-                desc.innerText = "Esta acción es irreversible. Ingresa la clave para autorizar.";
-            }
-
-            modal.classList.remove('hidden');
-            const input = document.getElementById('input-export-pass');
-            input.value = "";
-            input.focus();
-            
-            document.getElementById('btn-validar-pass').onclick = validarYEjecutar;
-        }
-
-        function cerrarPassword() {
-            document.getElementById('modal-password').classList.add('hidden');
-            pendingActionType = null;
-        }
-
-        function validarYEjecutar() {
-            const input = document.getElementById('input-export-pass').value;
-            if (input === EXPORT_PASSWORD) {
-                if (pendingActionType === 'export') {
+            pendingActionType = type; pacienteSeleccionadoId = id;
+            document.getElementById('modal-password').classList.remove('hidden');
+            document.getElementById('btn-validar-pass').onclick = () => {
+                if (document.getElementById('input-export-pass').value === EXPORT_PASSWORD) {
                     cerrarPassword();
-                    procesarExportacion();
-                } else if (pendingActionType === 'delete_permanent') {
-                    cerrarPassword();
-                    borrarDefinitivamente(pacienteSeleccionadoId);
-                }
-            } else {
-                alert("❌ Contraseña incorrecta. Acceso denegado.");
-            }
+                    if (pendingActionType === 'export') procesarExportacion();
+                } else alert("Clave incorrecta");
+            };
         }
 
-        function borrarDefinitivamente(id) {
-            let registros = JSON.parse(localStorage.getItem('feria_registros') || '[]');
-            registros = registros.filter(r => r.id !== id);
-            localStorage.setItem('feria_registros', JSON.stringify(registros));
-            actualizarListas();
-            
-            const toast = document.createElement("div");
-            toast.className = "fixed bottom-5 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full font-bold shadow-xl z-[300] animate-pop";
-            toast.innerText = "🗑️ Registro eliminado para siempre.";
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
+        function cerrarPassword() { document.getElementById('modal-password').classList.add('hidden'); }
 
         function procesarExportacion() {
             const registros = JSON.parse(localStorage.getItem('feria_registros') || '[]');
-            const activos = registros.filter(r => !r.borrado); // Solo exportar activos
-            
-            if (activos.length === 0) {
-                alert("No hay pacientes activos para exportar.");
-                return;
-            }
-
-            let csv = "\uFEFFFecha,Nombre,Edad,Genero,Telefono,Colonia,Presion Arterial,Frecuencia Cardiaca,Temperatura,Antecedentes,Alergias,Motivo,Servicios Preferidos,Servicios Aplicados,Evolucion Terapeuta\n";
-            
-            activos.forEach(r => {
-                const fila = [
-                    `"${r.fecha}"`,
-                    `"${r.nombre}"`,
-                    `"${r.edad}"`,
-                    `"${r.genero}"`,
-                    `"${r.telefono}"`,
-                    `"${r.colonia}"`,
-                    `"${r.presion}"`,
-                    `"${r.frecuencia}"`,
-                    `"${r.temperatura}"`,
-                    `"${r.antecedentes.join(' | ')}"`,
-                    `"${r.alergias || 'Ninguna'}"`,
-                    `"${r.motivo.replace(/"/g, '""').replace(/\n/g, ' ')}"`,
-                    `"${r.servicios_pref.join(' | ')}"`,
-                    `"${r.servicios_rec.join(' | ')}"`,
-                    `"${r.evolucion.replace(/"/g, '""').replace(/\n/g, ' ')}"`
-                ];
-                csv += fila.join(",") + "\n";
-            });
-
+            const activos = registros.filter(r => !r.borrado);
+            let csv = "\uFEFFFecha,Nombre,Edad,Antecedentes,Motivo,Evolucion\n";
+            activos.forEach(r => csv += `"${r.fecha}","${r.nombre}","${r.edad}","${r.antecedentes.join('|')}","${r.motivo}","${r.evolucion}"\n`);
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", `Reporte_Privado_Feria_${new Date().toISOString().split('T')[0]}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
+            link.href = URL.createObjectURL(blob);
+            link.download = `Reporte_${new Date().toISOString().split('T')[0]}.csv`;
             link.click();
-            document.body.removeChild(link);
         }
 
         function prepararBorrado(e, id) {
-            e.stopPropagation();
-            pacienteSeleccionadoId = id;
+            e.stopPropagation(); pacienteSeleccionadoId = id;
             document.getElementById('modal-confirm').classList.remove('hidden');
             document.getElementById('confirm-delete-btn').onclick = () => {
                 let registros = JSON.parse(localStorage.getItem('feria_registros') || '[]');
@@ -559,8 +460,7 @@
                 if (idx !== -1) {
                     registros[idx].borrado = true;
                     localStorage.setItem('feria_registros', JSON.stringify(registros));
-                    actualizarListas();
-                    cerrarConfirm();
+                    actualizarListas(); cerrarConfirm();
                 }
             };
         }
@@ -578,7 +478,6 @@
         function cerrarModal() { document.getElementById('modal-detalle').classList.add('hidden'); }
         function cerrarConfirm() { document.getElementById('modal-confirm').classList.add('hidden'); }
 
-        // Atajo Enter para el modal de contraseña
         document.getElementById('input-export-pass').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') document.getElementById('btn-validar-pass').click();
         });
