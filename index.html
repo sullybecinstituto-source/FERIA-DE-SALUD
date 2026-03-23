@@ -44,13 +44,28 @@
             border-bottom: 4px solid #059669;
             color: #059669;
         }
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        .logo-img {
+            max-width: 180px;
+            height: auto;
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
 <body class="pb-20">
 
     <!-- Navegación de Pestañas -->
     <nav class="bg-white shadow-md sticky top-0 z-50">
-        <div class="max-w-4xl mx-auto flex overflow-x-auto">
+        <div class="max-w-4xl mx-auto flex items-center overflow-x-auto">
+            <div class="px-4 flex-none border-r border-slate-100 py-2">
+                <img src="https://lh3.googleusercontent.com/d/1gjM8QJhfynpT0il86P3IRWwD_wMQWcCC" alt="SullyBec Logo" class="h-10 w-auto" onerror="this.src='https://via.placeholder.com/150x50?text=SullyBec'">
+            </div>
             <button onclick="switchTab('triage')" id="btn-triage" class="flex-none px-6 py-4 font-bold text-xs uppercase tracking-wider tab-active">
                 📝 Registro
             </button>
@@ -65,11 +80,14 @@
 
     <div class="max-w-4xl mx-auto p-4 md:p-8">
         
-        <!-- PESTAÑA 1: TRIAGE / REGISTRO -->
+        <!-- PESTAÑA 1: REGISTRO -->
         <section id="tab-triage">
-            <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-emerald-700 uppercase tracking-tight">SullyBec Instituto</h1>
-                <p class="text-slate-500 font-medium italic">Feria de Salud Integral 2026</p>
+            <div class="logo-container">
+                <img src="https://lh3.googleusercontent.com/d/1gjM8QJhfynpT0il86P3IRWwD_wMQWcCC" alt="SullyBec Instituto Logo" class="logo-img" onerror="this.style.display='none'">
+                <div class="text-center">
+                    <h1 class="text-3xl font-bold text-emerald-700 uppercase tracking-tight">SullyBec Instituto</h1>
+                    <p class="text-slate-500 font-medium italic">Feria de Salud Integral 2026</p>
+                </div>
             </div>
 
             <form id="clinicForm" class="bg-white rounded-2xl shadow-xl p-6 md:p-10 border border-slate-200">
@@ -164,8 +182,8 @@
                     <p class="text-xs text-slate-500">Información en tiempo real de la feria</p>
                 </div>
                 <div class="flex gap-2 w-full md:w-auto">
-                    <button onclick="exportarExcel()" class="flex-1 md:flex-none bg-emerald-100 text-emerald-700 font-bold text-sm px-4 py-3 rounded-xl border border-emerald-200 shadow-sm active:scale-95">
-                        📊 Exportar Excel (CSV)
+                    <button onclick="solicitarPasswordExportar()" class="flex-1 md:flex-none bg-emerald-100 text-emerald-700 font-bold text-sm px-4 py-3 rounded-xl border border-emerald-200 shadow-sm active:scale-95 flex items-center justify-center gap-2">
+                        🔒 Exportar Excel
                     </button>
                     <button onclick="actualizarListas()" class="bg-white text-slate-600 font-bold text-sm px-4 py-3 rounded-xl border shadow-sm active:scale-95">
                         🔄 Actualizar
@@ -179,10 +197,24 @@
         <section id="tab-papelera" class="hidden">
             <div class="mb-6 border-b pb-4">
                 <h2 class="text-2xl font-bold text-slate-600">Papelera de Reciclaje</h2>
-                <p class="text-xs text-slate-400 mt-1">Pacientes eliminados. Se pueden recuperar antes de cerrar la sesión.</p>
+                <p class="text-xs text-slate-400 mt-1">Pacientes eliminados temporalmente.</p>
             </div>
             <div id="lista-papelera" class="grid grid-cols-1 gap-4"></div>
         </section>
+    </div>
+
+    <!-- MODAL DE CONTRASEÑA -->
+    <div id="modal-password" class="hidden fixed inset-0 bg-black/70 z-[200] flex items-center justify-center p-6">
+        <div class="bg-white p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl">
+            <div class="text-5xl mb-4">🔐</div>
+            <h3 class="text-xl font-bold mb-2">Acceso Protegido</h3>
+            <p class="text-slate-500 text-sm mb-6">Ingresa la clave de administrador para descargar el reporte.</p>
+            <input type="password" id="input-export-pass" placeholder="Contraseña" class="w-full border-2 p-3 rounded-xl mb-6 text-center text-lg outline-none focus:border-emerald-500">
+            <div class="flex gap-4">
+                <button onclick="cerrarPassword()" class="flex-1 py-3 border rounded-xl font-bold text-slate-500">Cancelar</button>
+                <button onclick="validarYExportar()" class="flex-1 py-3 bg-emerald-600 text-white rounded-xl font-bold shadow-lg">Descargar</button>
+            </div>
+        </div>
     </div>
 
     <!-- MODAL DETALLE -->
@@ -202,7 +234,7 @@
         <div class="bg-white p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl">
             <div class="text-5xl mb-4">🗑️</div>
             <h3 class="text-xl font-bold mb-2">¿Mover a papelera?</h3>
-            <p class="text-slate-500 text-sm mb-6">El paciente no se borrará definitivamente, irá a la pestaña de Papelera.</p>
+            <p class="text-slate-500 text-sm mb-6">El paciente se moverá a la sección de Papelera.</p>
             <div class="flex gap-4">
                 <button onclick="cerrarConfirm()" class="flex-1 py-3 border rounded-xl font-bold text-slate-500">Cancelar</button>
                 <button id="confirm-delete-btn" class="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold shadow-lg">Mover</button>
@@ -211,6 +243,9 @@
     </div>
 
     <script>
+        // CONFIGURACIÓN DE SEGURIDAD
+        const EXPORT_PASSWORD = "Sully2026"; // <-- CAMBIA TU CONTRASEÑA AQUÍ
+
         const SERVICIOS = [
             "Masaje Terapéutico",
             "Acupuntura",
@@ -254,7 +289,11 @@
         function guardarRegistro() {
             const form = document.getElementById('clinicForm');
             if (!form.checkValidity()) {
-                alert("Por favor, llena los campos obligatorios marcados.");
+                const toast = document.createElement("div");
+                toast.className = "fixed bottom-5 left-1/2 -translate-x-1/2 bg-red-600 text-white px-6 py-3 rounded-full font-bold shadow-xl z-[300]";
+                toast.innerText = "⚠️ Completa los campos obligatorios";
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
                 return;
             }
 
@@ -285,7 +324,6 @@
             registros.unshift(registro);
             localStorage.setItem('feria_registros', JSON.stringify(registros));
 
-            alert("✅ Paciente registrado correctamente.");
             form.reset();
             switchTab('consultas');
         }
@@ -370,21 +408,41 @@
             if (idx !== -1) {
                 registros[idx].evolucion = texto;
                 localStorage.setItem('feria_registros', JSON.stringify(registros));
-                alert("✅ Seguimiento guardado.");
                 cerrarModal();
                 actualizarListas();
             }
         }
 
-        function exportarExcel() {
+        // --- LÓGICA DE SEGURIDAD PARA EXPORTACIÓN ---
+
+        function solicitarPasswordExportar() {
+            document.getElementById('modal-password').classList.remove('hidden');
+            document.getElementById('input-export-pass').value = "";
+            document.getElementById('input-export-pass').focus();
+        }
+
+        function cerrarPassword() {
+            document.getElementById('modal-password').classList.add('hidden');
+        }
+
+        function validarYExportar() {
+            const input = document.getElementById('input-export-pass').value;
+            if (input === EXPORT_PASSWORD) {
+                cerrarPassword();
+                procesarExportacion();
+            } else {
+                alert("❌ Contraseña incorrecta. Acceso denegado.");
+            }
+        }
+
+        function procesarExportacion() {
             const registros = JSON.parse(localStorage.getItem('feria_registros') || '[]');
             if (registros.length === 0) {
                 alert("No hay datos para exportar.");
                 return;
             }
 
-            // Cabeceras del CSV actualizadas
-            let csv = "Fecha,Nombre,Edad,Genero,Telefono,Colonia,Presion Arterial,Frecuencia Cardiaca,Temperatura,Antecedentes,Alergias,Motivo,Servicios Preferidos,Servicios Aplicados,Evolucion Terapeuta\n";
+            let csv = "\uFEFFFecha,Nombre,Edad,Genero,Telefono,Colonia,Presion Arterial,Frecuencia Cardiaca,Temperatura,Antecedentes,Alergias,Motivo,Servicios Preferidos,Servicios Aplicados,Evolucion Terapeuta\n";
             
             registros.forEach(r => {
                 const fila = [
@@ -411,7 +469,7 @@
             const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
             link.setAttribute("href", url);
-            link.setAttribute("download", `Reporte_Feria_Salud_${new Date().toLocaleDateString()}.csv`);
+            link.setAttribute("download", `Reporte_Privado_Feria_${new Date().toISOString().split('T')[0]}.csv`);
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
@@ -441,7 +499,6 @@
                 registros[idx].borrado = false;
                 localStorage.setItem('feria_registros', JSON.stringify(registros));
                 actualizarListas();
-                alert("Paciente restaurado.");
             }
         }
 
