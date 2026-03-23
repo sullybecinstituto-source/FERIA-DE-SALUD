@@ -77,7 +77,11 @@
                         <label class="checkbox-pill bg-white border-orange-100 text-sm"><input type="checkbox" name="antecedente" value="Diabetes" class="mr-2"><span>Diabetes</span></label>
                         <label class="checkbox-pill bg-white border-orange-100 text-sm"><input type="checkbox" name="antecedente" value="Hipertensión" class="mr-2"><span>Hipertensión</span></label>
                         <label class="checkbox-pill bg-white border-orange-100 text-sm"><input type="checkbox" name="antecedente" value="Cáncer" class="mr-2"><span>Cáncer</span></label>
-                        <label class="checkbox-pill bg-white border-orange-100 text-sm"><input type="checkbox" name="antecedente" value="Embarazo" class="mr-2"><span>Embarazo</span></label>
+                        
+                        <div class="flex items-center gap-2">
+                            <label class="checkbox-pill bg-white border-orange-100 text-sm flex-1"><input type="checkbox" name="antecedente" value="Embarazo" class="mr-2"><span>Embarazo</span></label>
+                            <input type="number" name="meses_embarazo" placeholder="Meses" class="w-20 border-2 p-2 rounded-lg text-xs outline-none focus:border-orange-400">
+                        </div>
                     </div>
                     <div class="space-y-3">
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Medicamentos que toma:</label>
@@ -88,10 +92,9 @@
                     </div>
                 </div>
 
-                <h2 class="section-title">4. Servicios</h2>
+                <h2 class="section-title">4. Servicios Aplicados</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="p-4 border rounded-xl bg-emerald-50 border-emerald-100">
-                        <p class="text-xs font-bold mb-4 uppercase text-emerald-800">Servicios Aplicados:</p>
+                    <div class="p-4 border rounded-xl bg-emerald-50 border-emerald-100 overflow-y-auto max-h-64">
                         <div id="rec-list" class="grid grid-cols-1 gap-2"></div>
                     </div>
                     <textarea name="motivo" rows="4" placeholder="Observaciones adicionales..." class="w-full border-2 p-3 rounded-lg outline-none focus:border-emerald-500 bg-slate-50/30"></textarea>
@@ -114,23 +117,6 @@
         </section>
     </div>
 
-    <div id="modal-success" class="hidden fixed inset-0 bg-black/70 z-[300] flex items-center justify-center p-6">
-        <div class="bg-white p-8 rounded-3xl max-w-sm w-full text-center animate-pop">
-            <div class="text-6xl mb-4">✅</div>
-            <h3 class="text-2xl font-black mb-8 uppercase">¡Guardado con Éxito!</h3>
-            <button onclick="cerrarSuccess()" class="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold">Continuar</button>
-        </div>
-    </div>
-
-    <div id="modal-detalle" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-2xl rounded-3xl max-h-[95vh] overflow-hidden flex flex-col animate-pop">
-            <div id="detalle-content" class="overflow-y-auto p-6 flex-1"></div>
-            <div class="p-6 bg-slate-50 border-t">
-                <button onclick="cerrarModal()" class="w-full bg-slate-200 py-4 rounded-2xl font-bold uppercase">Cerrar</button>
-            </div>
-        </div>
-    </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
         import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
@@ -149,14 +135,15 @@
         const db = getDatabase(app);
         let dataGlobal = [];
 
-        const SERVICIOS = ["Masaje Terapéutico", "Acupuntura", "Ventosas", "Quiropráctica", "Desintoxicación Iónica", "Nutrición", "Biomagnetismo", "Corte de Cabello"];
+        // TERAPIAS RESTAURADAS
+        const TERAPIAS = ["Masaje Terapéutico", "Acupuntura", "Ventosas", "Quiropráctica", "Desintoxicación Iónica", "Nutrición", "Biomagnetismo", "Corte de Cabello"];
 
         window.addEventListener('DOMContentLoaded', () => {
             const container = document.getElementById('rec-list');
-            container.innerHTML = SERVICIOS.map(s => `
+            container.innerHTML = TERAPIAS.map(t => `
                 <label class="checkbox-pill bg-white">
-                    <input type="checkbox" name="servicio_rec" value="${s}" class="mr-3 h-5 w-5">
-                    <span class="text-base">${s}</span>
+                    <input type="checkbox" name="servicio_rec" value="${t}" class="mr-3 h-5 w-5">
+                    <span class="text-base">${t}</span>
                 </label>
             `).join('');
             escucharDatos();
@@ -164,7 +151,7 @@
 
         window.guardarRegistro = function() {
             const form = document.getElementById('clinicForm');
-            if (!form.checkValidity()) { alert("⚠️ Por favor llena los campos obligatorios"); return; }
+            if (!form.checkValidity()) { alert("⚠️ Completa los campos obligatorios"); return; }
             
             const fd = new FormData(form);
             const nuevoID = Date.now().toString();
@@ -181,6 +168,7 @@
                 frecuencia: fd.get('frecuencia'),
                 temperatura: fd.get('temperatura'),
                 antecedentes: Array.from(fd.getAll('antecedente')),
+                meses_embarazo: fd.get('meses_embarazo') || "N/A",
                 medicamentos: fd.get('medicamentos') || "Ninguno",
                 alergias: fd.get('alergias') || "Ninguna",
                 servicios_rec: Array.from(fd.getAll('servicio_rec')),
@@ -191,7 +179,7 @@
             set(ref(db, 'pacientes/' + nuevoID), registro)
                 .then(() => {
                     form.reset();
-                    document.getElementById('modal-success').classList.remove('hidden');
+                    alert("¡Guardado correctamente!");
                 });
         };
 
@@ -206,68 +194,29 @@
         function actualizarUI() {
             const activos = dataGlobal.filter(r => !r.borrado).reverse();
             const borrados = dataGlobal.filter(r => r.borrado).reverse();
-
             document.getElementById('lista-pacientes').innerHTML = activos.map(r => renderCard(r, false)).join('');
             document.getElementById('lista-papelera').innerHTML = borrados.map(r => renderCard(r, true)).join('');
         }
 
         function renderCard(r, esPapelera) {
-            return `
-                <div class="bg-white p-5 rounded-2xl border-l-8 border-emerald-500 shadow-sm animate-pop">
-                    <div class="flex justify-between items-start cursor-pointer" onclick="verDetalle('${r.id}')">
-                        <div>
-                            <h3 class="font-bold text-slate-800 text-lg uppercase">${r.nombre}</h3>
-                            <div class="text-[11px] font-bold text-slate-500 uppercase">
-                                📞 ${r.telefono} | 🏠 COL: ${r.colonia} | 🎂 ${r.edad} AÑOS
-                            </div>
-                        </div>
-                        <div class="flex gap-2">
-                             <button onclick="event.stopPropagation(); moverAPapelera('${r.id}', ${!esPapelera})" class="text-xl">
-                                ${esPapelera ? '🔄' : '🗑️'}
-                            </button>
-                        </div>
+            return `<div class="bg-white p-5 rounded-2xl border-l-8 border-emerald-500 shadow-sm mb-4">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-lg uppercase">${r.nombre}</h3>
+                        <p class="text-xs text-slate-500">${r.telefono} | ${r.colonia}</p>
                     </div>
-                </div>`;
+                    <button onclick="moverAPapelera('${r.id}', ${!esPapelera})">${esPapelera ? '🔄' : '🗑️'}</button>
+                </div>
+            </div>`;
         }
 
-        window.verDetalle = function(id) {
-            const r = dataGlobal.find(reg => reg.id === id);
-            const content = document.getElementById('detalle-content');
-            content.innerHTML = `
-                <h2 class="text-2xl font-black uppercase text-emerald-700">${r.nombre}</h2>
-                <div class="grid grid-cols-2 gap-4 mt-4 text-sm">
-                    <p><b>Edad:</b> ${r.edad}</p>
-                    <p><b>Tel:</b> ${r.telefono}</p>
-                    <p><b>Colonia:</b> ${r.colonia}</p>
-                    <p><b>Presión:</b> ${r.presion}</p>
-                </div>
-                <div class="mt-6 p-4 bg-orange-50 rounded-xl">
-                    <p class="font-bold text-orange-800">Medicamentos:</p>
-                    <p>${r.medicamentos}</p>
-                    <p class="font-bold text-orange-800 mt-2">Antecedentes:</p>
-                    <p>${r.antecedentes.join(', ') || 'Ninguno'}</p>
-                </div>
-                <div class="mt-4 p-4 bg-emerald-50 rounded-xl">
-                    <p class="font-bold text-emerald-800">Tratamiento Aplicado:</p>
-                    <p>${r.servicios_rec.join(', ')}</p>
-                    <p class="mt-2"><b>Observaciones:</b> ${r.motivo}</p>
-                </div>
-            `;
-            document.getElementById('modal-detalle').classList.remove('hidden');
-        };
-
-        window.moverAPapelera = function(id, estado) {
-            update(ref(db, 'pacientes/' + id), { borrado: estado });
-        };
-
+        window.moverAPapelera = (id, estado) => update(ref(db, 'pacientes/' + id), { borrado: estado });
         window.switchTab = (tab) => {
             ['triage', 'consultas', 'papelera'].forEach(t => {
                 document.getElementById(`tab-${t}`).classList.toggle('hidden', t !== tab);
                 document.getElementById(`btn-${t}`).classList.toggle('tab-active', t === tab);
             });
         };
-        window.cerrarSuccess = () => document.getElementById('modal-success').classList.add('hidden');
-        window.cerrarModal = () => document.getElementById('modal-detalle').classList.add('hidden');
     </script>
 </body>
 </html>
