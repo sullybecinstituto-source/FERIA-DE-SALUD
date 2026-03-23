@@ -56,6 +56,13 @@
             height: auto;
             margin-bottom: 1rem;
         }
+        @keyframes popIn {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop {
+            animation: popIn 0.3s ease-out forwards;
+        }
     </style>
 </head>
 <body class="pb-20">
@@ -203,9 +210,24 @@
         </section>
     </div>
 
+    <!-- MODAL DE ÉXITO (GUARDADO) -->
+    <div id="modal-success" class="hidden fixed inset-0 bg-black/70 z-[300] flex items-center justify-center p-6">
+        <div class="bg-white p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl animate-pop border-b-8 border-emerald-500">
+            <div class="flex justify-center mb-4">
+                <img src="https://lh3.googleusercontent.com/d/1gjM8QJhfynpT0il86P3IRWwD_wMQWcCC" alt="SullyBec Logo" class="h-12 w-auto opacity-80">
+            </div>
+            <div class="text-6xl mb-4">✅</div>
+            <h3 class="text-2xl font-black text-slate-800 mb-2 uppercase">¡Registro Exitoso!</h3>
+            <p class="text-slate-500 text-sm mb-8">La información del paciente ha sido almacenada correctamente en el sistema.</p>
+            <button onclick="cerrarSuccess()" class="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold shadow-lg uppercase tracking-wider hover:bg-emerald-700 transition-colors">
+                Continuar
+            </button>
+        </div>
+    </div>
+
     <!-- MODAL DE CONTRASEÑA -->
     <div id="modal-password" class="hidden fixed inset-0 bg-black/70 z-[200] flex items-center justify-center p-6">
-        <div class="bg-white p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl">
+        <div class="bg-white p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl animate-pop">
             <div class="text-5xl mb-4">🔐</div>
             <h3 class="text-xl font-bold mb-2">Acceso Protegido</h3>
             <p class="text-slate-500 text-sm mb-6">Ingresa la clave de administrador para descargar el reporte.</p>
@@ -219,7 +241,7 @@
 
     <!-- MODAL DETALLE -->
     <div id="modal-detalle" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-2 sm:p-4">
-        <div class="bg-white w-full max-w-2xl rounded-3xl max-h-[95vh] overflow-hidden flex flex-col relative shadow-2xl">
+        <div class="bg-white w-full max-w-2xl rounded-3xl max-h-[95vh] overflow-hidden flex flex-col relative shadow-2xl animate-pop">
             <button onclick="cerrarModal()" class="absolute top-4 right-4 text-4xl text-slate-300 hover:text-slate-500">&times;</button>
             <div id="detalle-content" class="overflow-y-auto p-6 flex-1"></div>
             <div class="p-6 bg-slate-50 border-t flex gap-3">
@@ -231,7 +253,7 @@
 
     <!-- MODAL CONFIRMACIÓN BORRADO -->
     <div id="modal-confirm" class="hidden fixed inset-0 bg-black/50 z-[110] flex items-center justify-center p-6">
-        <div class="bg-white p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl">
+        <div class="bg-white p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl animate-pop">
             <div class="text-5xl mb-4">🗑️</div>
             <h3 class="text-xl font-bold mb-2">¿Mover a papelera?</h3>
             <p class="text-slate-500 text-sm mb-6">El paciente se moverá a la sección de Papelera.</p>
@@ -244,7 +266,7 @@
 
     <script>
         // CONFIGURACIÓN DE SEGURIDAD
-        const EXPORT_PASSWORD = "Sully2026"; // <-- CAMBIA TU CONTRASEÑA AQUÍ
+        const EXPORT_PASSWORD = "Sully2026"; 
 
         const SERVICIOS = [
             "Masaje Terapéutico",
@@ -286,11 +308,20 @@
             actualizarListas();
         }
 
+        function mostrarSuccess() {
+            document.getElementById('modal-success').classList.remove('hidden');
+        }
+
+        function cerrarSuccess() {
+            document.getElementById('modal-success').classList.add('hidden');
+            switchTab('consultas');
+        }
+
         function guardarRegistro() {
             const form = document.getElementById('clinicForm');
             if (!form.checkValidity()) {
                 const toast = document.createElement("div");
-                toast.className = "fixed bottom-5 left-1/2 -translate-x-1/2 bg-red-600 text-white px-6 py-3 rounded-full font-bold shadow-xl z-[300]";
+                toast.className = "fixed bottom-5 left-1/2 -translate-x-1/2 bg-red-600 text-white px-6 py-3 rounded-full font-bold shadow-xl z-[300] animate-pop";
                 toast.innerText = "⚠️ Completa los campos obligatorios";
                 document.body.appendChild(toast);
                 setTimeout(() => toast.remove(), 3000);
@@ -325,7 +356,7 @@
             localStorage.setItem('feria_registros', JSON.stringify(registros));
 
             form.reset();
-            switchTab('consultas');
+            mostrarSuccess();
         }
 
         function actualizarListas() {
@@ -343,7 +374,7 @@
         function renderCard(r, esPapelera) {
             const alerta = r.antecedentes.length > 0 || r.alergias;
             return `
-                <div class="bg-white p-5 rounded-2xl border-l-8 ${alerta ? 'border-red-500 bg-red-50/20' : 'border-emerald-500'} shadow-sm relative group">
+                <div class="bg-white p-5 rounded-2xl border-l-8 ${alerta ? 'border-red-500 bg-red-50/20' : 'border-emerald-500'} shadow-sm relative group animate-pop">
                     <div class="flex justify-between items-start cursor-pointer" onclick="verDetalle(${r.id})">
                         <div class="flex-1 pr-10">
                             <h3 class="font-bold text-slate-800 text-lg uppercase leading-tight mb-1">${r.nombre}</h3>
@@ -412,8 +443,6 @@
                 actualizarListas();
             }
         }
-
-        // --- LÓGICA DE SEGURIDAD PARA EXPORTACIÓN ---
 
         function solicitarPasswordExportar() {
             document.getElementById('modal-password').classList.remove('hidden');
