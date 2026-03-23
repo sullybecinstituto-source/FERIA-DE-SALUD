@@ -189,7 +189,7 @@
                     <p class="text-xs text-slate-500">Información en tiempo real de la feria</p>
                 </div>
                 <div class="flex gap-2 w-full md:w-auto">
-                    <button onclick="solicitarPasswordExportar()" class="flex-1 md:flex-none bg-emerald-100 text-emerald-700 font-bold text-sm px-4 py-3 rounded-xl border border-emerald-200 shadow-sm active:scale-95 flex items-center justify-center gap-2">
+                    <button onclick="solicitarPasswordModal('export')" class="flex-1 md:flex-none bg-emerald-100 text-emerald-700 font-bold text-sm px-4 py-3 rounded-xl border border-emerald-200 shadow-sm active:scale-95 flex items-center justify-center gap-2">
                         🔒 Exportar Excel
                     </button>
                     <button onclick="actualizarListas()" class="bg-white text-slate-600 font-bold text-sm px-4 py-3 rounded-xl border shadow-sm active:scale-95">
@@ -204,7 +204,7 @@
         <section id="tab-papelera" class="hidden">
             <div class="mb-6 border-b pb-4">
                 <h2 class="text-2xl font-bold text-slate-600">Papelera de Reciclaje</h2>
-                <p class="text-xs text-slate-400 mt-1">Pacientes eliminados temporalmente.</p>
+                <p class="text-xs text-slate-400 mt-1">Pacientes eliminados temporalmente. Los registros aquí no aparecerán en el reporte Excel.</p>
             </div>
             <div id="lista-papelera" class="grid grid-cols-1 gap-4"></div>
         </section>
@@ -225,16 +225,16 @@
         </div>
     </div>
 
-    <!-- MODAL DE CONTRASEÑA -->
+    <!-- MODAL DE CONTRASEÑA (MULTIUSO) -->
     <div id="modal-password" class="hidden fixed inset-0 bg-black/70 z-[200] flex items-center justify-center p-6">
         <div class="bg-white p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl animate-pop">
             <div class="text-5xl mb-4">🔐</div>
-            <h3 class="text-xl font-bold mb-2">Acceso Protegido</h3>
-            <p class="text-slate-500 text-sm mb-6">Ingresa la clave de administrador para descargar el reporte.</p>
+            <h3 id="password-modal-title" class="text-xl font-bold mb-2">Acceso Protegido</h3>
+            <p id="password-modal-desc" class="text-slate-500 text-sm mb-6">Ingresa la clave de administrador.</p>
             <input type="password" id="input-export-pass" placeholder="Contraseña" class="w-full border-2 p-3 rounded-xl mb-6 text-center text-lg outline-none focus:border-emerald-500">
             <div class="flex gap-4">
                 <button onclick="cerrarPassword()" class="flex-1 py-3 border rounded-xl font-bold text-slate-500">Cancelar</button>
-                <button onclick="validarYExportar()" class="flex-1 py-3 bg-emerald-600 text-white rounded-xl font-bold shadow-lg">Descargar</button>
+                <button id="btn-validar-pass" class="flex-1 py-3 bg-emerald-600 text-white rounded-xl font-bold shadow-lg">Confirmar</button>
             </div>
         </div>
     </div>
@@ -251,7 +251,7 @@
         </div>
     </div>
 
-    <!-- MODAL CONFIRMACIÓN BORRADO -->
+    <!-- MODAL CONFIRMACIÓN MOVER A PAPELERA -->
     <div id="modal-confirm" class="hidden fixed inset-0 bg-black/50 z-[110] flex items-center justify-center p-6">
         <div class="bg-white p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl animate-pop">
             <div class="text-5xl mb-4">🗑️</div>
@@ -280,6 +280,7 @@
         ];
 
         let pacienteSeleccionadoId = null;
+        let pendingActionType = null; // 'export' o 'delete_permanent'
 
         window.onload = () => {
             renderServicios();
@@ -386,10 +387,13 @@
                                 <span class="text-slate-500">${r.colonia}</span>
                             </div>
                         </div>
-                        <div class="text-right">
+                        <div class="text-right flex flex-col items-end gap-2">
                             <span class="text-[10px] block font-black text-slate-300 mb-1">${r.fecha.split(',')[1]}</span>
                             ${esPapelera ? 
-                                `<button onclick="restaurarPaciente(${r.id})" class="text-emerald-600 text-[10px] font-black border border-emerald-200 px-2 py-1 rounded bg-emerald-50">RESTAURAR</button>` : 
+                                `<div class="flex gap-1">
+                                    <button onclick="event.stopPropagation(); restaurarPaciente(${r.id})" class="text-emerald-600 text-[9px] font-black border border-emerald-200 px-2 py-1.5 rounded bg-emerald-50 hover:bg-emerald-100 uppercase tracking-tighter">Restaurar</button>
+                                    <button onclick="event.stopPropagation(); solicitarPasswordModal('delete_permanent', ${r.id})" class="text-white text-[9px] font-black px-2 py-1.5 rounded bg-red-500 hover:bg-red-600 uppercase tracking-tighter">Eliminar Permanente</button>
+                                </div>` : 
                                 `<button onclick="prepararBorrado(event, ${r.id})" class="text-slate-200 hover:text-red-400 text-xl transition-colors">🗑️</button>`
                             }
                         </div>
@@ -444,36 +448,76 @@
             }
         }
 
-        function solicitarPasswordExportar() {
-            document.getElementById('modal-password').classList.remove('hidden');
-            document.getElementById('input-export-pass').value = "";
-            document.getElementById('input-export-pass').focus();
+        // --- LÓGICA DE CONTRASEÑA MULTIUSO ---
+        function solicitarPasswordModal(type, id = null) {
+            pendingActionType = type;
+            pacienteSeleccionadoId = id;
+            
+            const modal = document.getElementById('modal-password');
+            const title = document.getElementById('password-modal-title');
+            const desc = document.getElementById('password-modal-desc');
+            
+            if (type === 'export') {
+                title.innerText = "Exportar Reporte";
+                desc.innerText = "Ingresa la clave para descargar el archivo Excel.";
+            } else if (type === 'delete_permanent') {
+                title.innerText = "Borrado Permanente";
+                desc.innerText = "Esta acción es irreversible. Ingresa la clave para autorizar.";
+            }
+
+            modal.classList.remove('hidden');
+            const input = document.getElementById('input-export-pass');
+            input.value = "";
+            input.focus();
+            
+            document.getElementById('btn-validar-pass').onclick = validarYEjecutar;
         }
 
         function cerrarPassword() {
             document.getElementById('modal-password').classList.add('hidden');
+            pendingActionType = null;
         }
 
-        function validarYExportar() {
+        function validarYEjecutar() {
             const input = document.getElementById('input-export-pass').value;
             if (input === EXPORT_PASSWORD) {
-                cerrarPassword();
-                procesarExportacion();
+                if (pendingActionType === 'export') {
+                    cerrarPassword();
+                    procesarExportacion();
+                } else if (pendingActionType === 'delete_permanent') {
+                    cerrarPassword();
+                    borrarDefinitivamente(pacienteSeleccionadoId);
+                }
             } else {
                 alert("❌ Contraseña incorrecta. Acceso denegado.");
             }
         }
 
+        function borrarDefinitivamente(id) {
+            let registros = JSON.parse(localStorage.getItem('feria_registros') || '[]');
+            registros = registros.filter(r => r.id !== id);
+            localStorage.setItem('feria_registros', JSON.stringify(registros));
+            actualizarListas();
+            
+            const toast = document.createElement("div");
+            toast.className = "fixed bottom-5 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full font-bold shadow-xl z-[300] animate-pop";
+            toast.innerText = "🗑️ Registro eliminado para siempre.";
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
         function procesarExportacion() {
             const registros = JSON.parse(localStorage.getItem('feria_registros') || '[]');
-            if (registros.length === 0) {
-                alert("No hay datos para exportar.");
+            const activos = registros.filter(r => !r.borrado); // Solo exportar activos
+            
+            if (activos.length === 0) {
+                alert("No hay pacientes activos para exportar.");
                 return;
             }
 
             let csv = "\uFEFFFecha,Nombre,Edad,Genero,Telefono,Colonia,Presion Arterial,Frecuencia Cardiaca,Temperatura,Antecedentes,Alergias,Motivo,Servicios Preferidos,Servicios Aplicados,Evolucion Terapeuta\n";
             
-            registros.forEach(r => {
+            activos.forEach(r => {
                 const fila = [
                     `"${r.fecha}"`,
                     `"${r.nombre}"`,
@@ -533,6 +577,11 @@
 
         function cerrarModal() { document.getElementById('modal-detalle').classList.add('hidden'); }
         function cerrarConfirm() { document.getElementById('modal-confirm').classList.add('hidden'); }
+
+        // Atajo Enter para el modal de contraseña
+        document.getElementById('input-export-pass').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') document.getElementById('btn-validar-pass').click();
+        });
     </script>
 </body>
 </html>
