@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SullyBec Instituto - Gestión Clínica</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
@@ -104,7 +105,12 @@
         </section>
 
         <section id="tab-consultas" class="hidden">
-            <h2 class="text-2xl font-bold text-slate-800 mb-6 uppercase tracking-tight">Pacientes Activos</h2>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-slate-800 uppercase tracking-tight">Pacientes Activos</h2>
+                <button onclick="descargarExcel()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold text-[10px] hover:bg-blue-700 transition-all uppercase flex items-center gap-2">
+                    📊 Descargar Excel
+                </button>
+            </div>
             <div id="lista-pacientes" class="grid grid-cols-1 gap-4"></div>
         </section>
 
@@ -157,7 +163,7 @@
 
         window.guardarRegistro = function() {
             const form = document.getElementById('clinicForm');
-            if (!form.checkValidity()) { alert("⚠️ Completa los datos"); return; }
+            if (!form.checkValidity()) { alert("⚠️ Completa los datos obligatorios."); return; }
             const fd = new FormData(form);
             const nuevoID = Date.now().toString();
             const registro = {
@@ -181,7 +187,7 @@
             };
             set(ref(db, 'pacientes/' + nuevoID), registro).then(() => { 
                 form.reset(); 
-                alert("✅ Guardado"); 
+                alert("✅ Guardado con éxito"); 
                 switchTab('consultas');
             });
         };
@@ -222,6 +228,42 @@
                 </div>
             </div>`;
         }
+
+        window.descargarExcel = function() {
+            const password = prompt("Introduce la contraseña para descargar el reporte:");
+            if (password === PASS_MAESTRA) {
+                if (dataGlobal.length === 0) { alert("No hay datos para exportar."); return; }
+                
+                // Preparar datos para Excel (aplanar arrays)
+                const excelData = dataGlobal.map(r => ({
+                    ID: r.id,
+                    Fecha: r.fecha,
+                    Nombre: r.nombre,
+                    Edad: r.edad,
+                    Genero: r.genero,
+                    Telefono: r.telefono,
+                    Colonia: r.colonia,
+                    Presion: r.presion,
+                    Frecuencia: r.frecuencia,
+                    Temperatura: r.temperatura,
+                    Antecedentes: r.antecedentes ? r.antecedentes.join(", ") : "",
+                    Gestacion_Meses: r.meses_embarazo,
+                    Alergias: r.alergias,
+                    Medicamentos: r.medicamentos,
+                    Interes_Servicios: r.servicios_interes ? r.servicios_interes.join(", ") : "",
+                    Terapias_Aplicadas: r.servicios_aplicados ? r.servicios_aplicados.join(", ") : "",
+                    Estado: r.borrado ? "Papelera" : "Activo"
+                }));
+
+                const ws = XLSX.utils.json_to_sheet(excelData);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Pacientes_Feria_Salud");
+                XLSX.writeFile(wb, `Reporte_SullyBec_${new Date().toLocaleDateString()}.xlsx`);
+                alert("📊 Reporte generado con éxito.");
+            } else if (password !== null) {
+                alert("❌ Contraseña incorrecta.");
+            }
+        };
 
         window.verDetalle = function(id) {
             const r = dataGlobal.find(reg => reg.id === id);
