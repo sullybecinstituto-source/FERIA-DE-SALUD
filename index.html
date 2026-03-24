@@ -17,7 +17,10 @@
         .animate-pop { animation: popIn 0.3s ease-out forwards; }
         @keyframes popIn { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         
-        #logo-container img { max-height: 150px; width: auto; object-fit: contain; }
+        #logo-container img { max-height: 120px; width: auto; object-fit: contain; }
+        .patient-card { cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .patient-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .patient-card:active { transform: scale(0.98); }
     </style>
 </head>
 <body class="pb-20">
@@ -29,9 +32,8 @@
                 <button onclick="switchTab('consultas')" id="btn-consultas" class="flex-none px-6 py-4 font-bold text-xs uppercase tracking-wider text-slate-400">🔍 Consultas</button>
                 <button onclick="switchTab('papelera')" id="btn-papelera" class="flex-none px-6 py-4 font-bold text-xs uppercase tracking-wider text-slate-400">🗑️ Papelera</button>
             </div>
-            <!-- Botón de logo ahora con función de verificación -->
             <button onclick="verificarParaSubirLogo()" class="bg-slate-100 hover:bg-slate-200 p-2 rounded-lg text-[10px] font-bold uppercase text-slate-500 transition-all">
-                📁 Subir Logo
+                📁 Logo
             </button>
             <input type="file" id="logo-uploader" class="hidden" accept="image/*">
         </div>
@@ -119,7 +121,7 @@
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold text-slate-800 uppercase tracking-tight">Pacientes Activos</h2>
                 <button onclick="descargarExcel()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold text-[10px] hover:bg-blue-700 transition-all uppercase flex items-center gap-2">
-                    📊 Descargar Excel
+                    📊 Excel
                 </button>
             </div>
             <div id="lista-pacientes" class="grid grid-cols-1 gap-4"></div>
@@ -127,8 +129,8 @@
 
         <section id="tab-papelera" class="hidden">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-slate-600 uppercase tracking-tight">Papelera / Historial</h2>
-                <button onclick="vaciarPapelera()" class="bg-red-100 text-red-600 px-4 py-2 rounded-lg font-bold text-[10px] hover:bg-red-200 transition-all uppercase">🗑️ Vaciar Papelera</button>
+                <h2 class="text-2xl font-bold text-slate-600 uppercase tracking-tight">Papelera</h2>
+                <button onclick="vaciarPapelera()" class="bg-red-100 text-red-600 px-4 py-2 rounded-lg font-bold text-[10px] hover:bg-red-200 transition-all uppercase">🗑️ Vaciar</button>
             </div>
             <div id="lista-papelera" class="grid grid-cols-1 gap-4"></div>
         </section>
@@ -177,81 +179,99 @@
         const db = getDatabase(app);
         let dataGlobal = [];
         const PASS_MAESTRA = "Sully2026";
-
         const TERAPIAS = ["Masaje Terapéutico", "Acupuntura", "Ventosas", "Quiropráctica", "Desintoxicación Iónica", "Nutrición", "Biomagnetismo", "Corte de Cabello"];
 
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedLogo = localStorage.getItem('sullybec_logo');
-            if (savedLogo) {
-                document.getElementById('main-logo').src = savedLogo;
+        // --- FUNCIONES GLOBALES PARA ACCESO DESDE HTML ---
+
+        window.verDetalle = function(id) {
+            const r = dataGlobal.find(reg => reg.id === id);
+            if (!r) return;
+            const content = document.getElementById('detalle-content');
+            content.innerHTML = `
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-black uppercase text-emerald-700">${r.nombre}</h2>
+                    <span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full">${r.fecha}</span>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-6 text-xs bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <p><b>EDAD:</b> ${r.edad} años</p><p><b>GÉNERO:</b> ${r.genero}</p><p><b>TEL:</b> ${r.telefono}</p><p><b>COLONIA:</b> ${r.colonia}</p>
+                </div>
+                <div class="grid grid-cols-3 gap-2 mb-6 text-center">
+                    <div class="p-2 bg-red-50 rounded-xl border border-red-100"><p class="text-[8px] font-bold text-red-400 uppercase">Presión</p><p class="font-black text-red-700 text-sm">${r.presion}</p></div>
+                    <div class="p-2 bg-red-50 rounded-xl border border-red-100"><p class="text-[8px] font-bold text-red-400 uppercase">Pulso</p><p class="font-black text-red-700 text-sm">${r.frecuencia}</p></div>
+                    <div class="p-2 bg-red-50 rounded-xl border border-red-100"><p class="text-[8px] font-bold text-red-400 uppercase">Temp</p><p class="font-black text-red-700 text-sm">${r.temperatura}°C</p></div>
+                </div>
+                <div class="space-y-4">
+                    <div class="p-4 border border-orange-100 rounded-xl bg-orange-50/20">
+                        <h4 class="text-[10px] font-black text-orange-700 uppercase mb-2">Historial Clínico</h4>
+                        <p class="text-xs mb-1"><b>Antecedentes:</b> ${r.antecedentes ? r.antecedentes.join(', ') : 'Ninguno'}</p>
+                        ${r.meses_embarazo !== "0" ? `<p class="text-xs mb-1"><b>Meses Embarazo:</b> ${r.meses_embarazo}</p>` : ''}
+                        <p class="text-xs mb-1"><b>Alergias:</b> ${r.alergias}</p>
+                        <p class="text-xs"><b>Medicamentos:</b> ${r.medicamentos}</p>
+                    </div>
+                    <div class="p-4 border-2 border-blue-200 rounded-xl bg-blue-50/50">
+                        <h4 class="text-[10px] font-black text-blue-800 uppercase mb-2 flex justify-between items-center">
+                            Notas de Consulta / Evolución
+                            <span class="text-[8px] text-blue-400 font-normal italic">Escribe lo realizado hoy</span>
+                        </h4>
+                        <textarea id="notas-input-${r.id}" rows="5" class="w-full border-2 border-blue-100 rounded-xl p-3 text-sm outline-none focus:border-blue-400 mb-3 bg-white" placeholder="Ej: Se aplicó acupuntura...">${r.notas_consulta || ''}</textarea>
+                        <button onclick="guardarNotas('${r.id}')" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold uppercase text-[10px] hover:bg-blue-700 transition-all shadow-md active:scale-95">
+                            💾 Guardar Notas de Consulta
+                        </button>
+                    </div>
+                </div>`;
+            document.getElementById('modal-detalle').classList.remove('hidden');
+        };
+
+        window.moverAPapelera = function(id, estado) {
+            update(ref(db, 'pacientes/' + id), { borrado: estado });
+        };
+
+        window.guardarNotas = async function(id) {
+            const notas = document.getElementById(`notas-input-${id}`).value;
+            try {
+                await update(ref(db, 'pacientes/' + id), { notas_consulta: notas });
+                showCustomModal({ title: "Guardado", message: "Notas registradas.", icon: "✅", showCancel: false, confirmColor: "bg-blue-600" });
+            } catch (error) {
+                showCustomModal({ title: "Error", message: "Error al guardar.", icon: "❌", showCancel: false, confirmColor: "bg-red-600" });
             }
+        };
 
-            document.getElementById('logo-uploader').addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        const base64Image = event.target.result;
-                        document.getElementById('main-logo').src = base64Image;
-                        localStorage.setItem('sullybec_logo', base64Image);
-                        showCustomModal({ title: "Logo Actualizado", message: "Tu logo se ha guardado localmente.", icon: "🖼️", showCancel: false });
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
+        window.vaciarPapelera = async function() {
+            const password = await showCustomModal({ title: "Vaciar Papelera", message: "Confirmación requerida.", icon: "🗑️", isPrompt: true, confirmColor: "bg-red-600" });
+            if (password === PASS_MAESTRA) {
+                const borrados = dataGlobal.filter(r => r.borrado);
+                borrados.forEach(r => remove(ref(db, 'pacientes/' + r.id)));
+                showCustomModal({ title: "Borrado", message: "Papelera vaciada.", icon: "♻️", showCancel: false });
+            }
+        };
 
-            const interesCont = document.getElementById('interes-list');
-            const aplicadoCont = document.getElementById('aplicado-list');
-            const html = TERAPIAS.map(t => `<label class="checkbox-pill bg-white flex"><input type="checkbox" name="serv_temp" data-val="${t}" value="${t}" class="mr-3 h-5 w-5"><span class="text-sm">${t}</span></label>`).join('');
-            interesCont.innerHTML = html.replace(/serv_temp/g, 'servicio_interes');
-            aplicadoCont.innerHTML = html.replace(/serv_temp/g, 'servicio_aplicado');
-            escucharDatos();
-        });
+        window.descargarExcel = async function() {
+            const password = await showCustomModal({ title: "Descargar Excel", message: "Introduce la clave maestra.", icon: "📊", isPrompt: true, confirmColor: "bg-blue-600" });
+            if (password === PASS_MAESTRA) {
+                if (dataGlobal.length === 0) return;
+                const excelData = dataGlobal.map(r => ({
+                    Fecha: r.fecha, Nombre: r.nombre, Edad: r.edad, Genero: r.genero, Telefono: r.telefono, Colonia: r.colonia,
+                    Presion: r.presion, Pulso: r.frecuencia, Temp: r.temperatura, Antecedentes: r.antecedentes ? r.antecedentes.join(", ") : "",
+                    Alergias: r.alergias, Medicamentos: r.medicamentos, Interes: r.servicios_interes ? r.servicios_interes.join(", ") : "",
+                    Aplicado: r.servicios_aplicados ? r.servicios_aplicados.join(", ") : "",
+                    Notas_Consulta: r.notas_consulta || "",
+                    Estado: r.borrado ? "Papelera" : "Activo"
+                }));
+                const ws = XLSX.utils.json_to_sheet(excelData);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Pacientes");
+                XLSX.writeFile(wb, `SullyBec_Reporte_${new Date().toLocaleDateString()}.xlsx`);
+            }
+        };
 
-        async function showCustomModal({ title, message, icon, isPrompt = false, confirmColor = 'bg-emerald-600', showCancel = true }) {
-            return new Promise((resolve) => {
-                const modal = document.getElementById('custom-modal');
-                const titleEl = document.getElementById('modal-title');
-                const msgEl = document.getElementById('modal-message');
-                const iconEl = document.getElementById('modal-icon');
-                const inputCont = document.getElementById('modal-input-container');
-                const input = document.getElementById('modal-input');
-                const btnConfirm = document.getElementById('modal-btn-confirm');
-                const btnCancel = document.getElementById('modal-btn-cancel');
-
-                titleEl.innerText = title;
-                msgEl.innerText = message;
-                iconEl.innerText = icon;
-                
-                inputCont.classList.toggle('hidden', !isPrompt);
-                btnCancel.classList.toggle('hidden', !showCancel);
-                btnConfirm.className = `flex-1 py-3 rounded-xl font-bold uppercase text-white transition-all text-xs ${confirmColor}`;
-                input.value = "";
-
-                modal.classList.remove('hidden');
-
-                const cleanUp = (value) => {
-                    modal.classList.add('hidden');
-                    btnConfirm.onclick = null;
-                    btnCancel.onclick = null;
-                    resolve(value);
-                };
-
-                btnConfirm.onclick = () => cleanUp(isPrompt ? input.value : true);
-                btnCancel.onclick = () => cleanUp(null);
-            });
-        }
-
-        // Nueva función para proteger la subida del logo
         window.verificarParaSubirLogo = async function() {
             const password = await showCustomModal({ 
                 title: "Acceso Restringido", 
-                message: "Introduce la clave maestra para cambiar el logo.", 
+                message: "Introduce la clave maestra para cambiar el logo global.", 
                 icon: "🔒", 
                 isPrompt: true, 
                 confirmColor: "bg-slate-700" 
             });
-            
             if (password === PASS_MAESTRA) {
                 document.getElementById('logo-uploader').click();
             } else if (password !== null) {
@@ -262,7 +282,7 @@
         window.guardarRegistro = async function() {
             const form = document.getElementById('clinicForm');
             if (!form.checkValidity()) { 
-                showCustomModal({ title: "Atención", message: "Completa los datos obligatorios antes de guardar.", icon: "⚠️", showCancel: false, confirmColor: "bg-orange-500" });
+                showCustomModal({ title: "Atención", message: "Completa los datos obligatorios.", icon: "⚠️", showCancel: false, confirmColor: "bg-orange-500" });
                 return; 
             }
             const fd = new FormData(form);
@@ -290,10 +310,44 @@
             
             set(ref(db, 'pacientes/' + nuevoID), registro).then(async () => { 
                 form.reset(); 
-                await showCustomModal({ title: "¡Éxito!", message: "El paciente ha sido registrado correctamente.", icon: "✅", showCancel: false });
+                await showCustomModal({ title: "¡Éxito!", message: "Paciente registrado.", icon: "✅", showCancel: false });
                 switchTab('consultas');
             });
         };
+
+        // --- LÓGICA DE INICIO ---
+
+        window.addEventListener('DOMContentLoaded', () => {
+            onValue(ref(db, 'config/logo'), (snapshot) => {
+                const cloudLogo = snapshot.val();
+                if (cloudLogo) document.getElementById('main-logo').src = cloudLogo;
+            });
+
+            document.getElementById('logo-uploader').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    if (file.size > 800000) {
+                        showCustomModal({ title: "Imagen Pesada", message: "Sube una imagen menor a 800KB.", icon: "⚖️", showCancel: false });
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        set(ref(db, 'config/logo'), event.target.result)
+                            .then(() => showCustomModal({ title: "Sincronizado", message: "Logo actualizado globalmente.", icon: "☁️", showCancel: false }));
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Generar listas de terapias
+            const interesCont = document.getElementById('interes-list');
+            const aplicadoCont = document.getElementById('aplicado-list');
+            const html = TERAPIAS.map(t => `<label class="checkbox-pill bg-white flex"><input type="checkbox" name="serv_temp" value="${t}" class="mr-3 h-5 w-5"><span class="text-sm">${t}</span></label>`).join('');
+            interesCont.innerHTML = html.replace(/serv_temp/g, 'servicio_interes');
+            aplicadoCont.innerHTML = html.replace(/serv_temp/g, 'servicio_aplicado');
+            
+            escucharDatos();
+        });
 
         function escucharDatos() {
             onValue(ref(db, 'pacientes'), (snapshot) => {
@@ -306,6 +360,7 @@
         function actualizarUI() {
             const activos = dataGlobal.filter(r => !r.borrado).sort((a, b) => b.id - a.id);
             const borrados = dataGlobal.filter(r => r.borrado).sort((a, b) => b.id - a.id);
+            
             document.getElementById('lista-pacientes').innerHTML = activos.length ? activos.map(r => renderCard(r, false)).join('') : '<p class="text-center py-10 text-slate-400 italic text-sm">No hay pacientes activos.</p>';
             document.getElementById('lista-papelera').innerHTML = borrados.length ? borrados.map(r => renderCard(r, true)).join('') : '<p class="text-center py-10 text-slate-400 italic text-sm">Papelera vacía.</p>';
         }
@@ -313,104 +368,58 @@
         function renderCard(r, esPapelera) {
             const tieneAlertas = (r.antecedentes && r.antecedentes.length > 0) || (r.alergias && r.alergias !== "Ninguna" && r.alergias !== "");
             return `
-            <div class="bg-white p-5 rounded-2xl border-l-8 ${tieneAlertas ? 'border-red-500 bg-red-50/10' : 'border-emerald-500'} shadow-sm mb-4 animate-pop hover:shadow-md transition-all">
-                <div class="flex justify-between items-start" onclick="verDetalle('${r.id}')">
-                    <div class="flex-1 cursor-pointer">
-                        <h3 class="font-bold text-slate-800 text-lg uppercase">${r.nombre} ${tieneAlertas ? '⚠️' : ''}</h3>
-                        <p class="text-[11px] font-bold text-slate-500 uppercase">📞 ${r.telefono} • COL: ${r.colonia}</p>
-                        <div class="mt-3 flex flex-wrap gap-1">
-                            ${(r.servicios_aplicados || []).map(s => `<span class="text-[9px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold uppercase">${s}</span>`).join('') || '<span class="text-[9px] bg-slate-100 text-slate-400 px-2 py-0.5 rounded-full font-bold uppercase">En espera</span>'}
+            <div class="patient-card bg-white rounded-2xl border-l-8 ${tieneAlertas ? 'border-red-500 bg-red-50/10' : 'border-emerald-500'} shadow-sm mb-4 animate-pop overflow-hidden flex">
+                <div class="flex-1 p-5" onclick="verDetalle('${r.id}')">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-lg uppercase">${r.nombre} ${tieneAlertas ? '⚠️' : ''}</h3>
+                            <p class="text-[11px] font-bold text-slate-500 uppercase">📞 ${r.telefono} • COL: ${r.colonia}</p>
                         </div>
-                    </div>
-                    <div class="flex flex-col items-end gap-4">
                         <span class="text-[10px] text-slate-300 font-medium">${r.fecha ? r.fecha.split(',')[1] || r.fecha : ''}</span>
-                        <button onclick="event.stopPropagation(); moverAPapelera('${r.id}', ${!esPapelera})" class="p-2 bg-slate-50 rounded-xl hover:bg-slate-200 transition-colors">
-                            ${esPapelera ? '🔄' : '🗑️'}
-                        </button>
                     </div>
+                    <div class="mt-3 flex flex-wrap gap-1">
+                        ${(r.servicios_aplicados || []).map(s => `<span class="text-[9px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold uppercase">${s}</span>`).join('') || '<span class="text-[9px] bg-slate-100 text-slate-400 px-2 py-0.5 rounded-full font-bold uppercase">En espera</span>'}
+                    </div>
+                </div>
+                <div class="w-16 bg-slate-50 flex items-center justify-center border-l border-slate-100">
+                    <button onclick="event.stopPropagation(); moverAPapelera('${r.id}', ${!esPapelera})" class="p-3 bg-white rounded-xl shadow-sm hover:bg-slate-200 transition-colors text-lg">
+                        ${esPapelera ? '🔄' : '🗑️'}
+                    </button>
                 </div>
             </div>`;
         }
 
-        window.verDetalle = function(id) {
-            const r = dataGlobal.find(reg => reg.id === id);
-            if (!r) return;
-            const content = document.getElementById('detalle-content');
-            content.innerHTML = `
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-black uppercase text-emerald-700">${r.nombre}</h2>
-                    <span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full">${r.fecha}</span>
-                </div>
-                <div class="grid grid-cols-2 gap-4 mb-6 text-xs bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <p><b>EDAD:</b> ${r.edad} años</p><p><b>GÉNERO:</b> ${r.genero}</p><p><b>TEL:</b> ${r.telefono}</p><p><b>COLONIA:</b> ${r.colonia}</p>
-                </div>
-                <div class="grid grid-cols-3 gap-2 mb-6 text-center">
-                    <div class="p-2 bg-red-50 rounded-xl border border-red-100"><p class="text-[8px] font-bold text-red-400 uppercase">Presión</p><p class="font-black text-red-700 text-sm">${r.presion}</p></div>
-                    <div class="p-2 bg-red-50 rounded-xl border border-red-100"><p class="text-[8px] font-bold text-red-400 uppercase">Pulso</p><p class="font-black text-red-700 text-sm">${r.frecuencia}</p></div>
-                    <div class="p-2 bg-red-50 rounded-xl border border-red-100"><p class="text-[8px] font-bold text-red-400 uppercase">Temp</p><p class="font-black text-red-700 text-sm">${r.temperatura}°C</p></div>
-                </div>
-                <div class="space-y-4">
-                    <div class="p-4 border border-orange-100 rounded-xl bg-orange-50/20">
-                        <h4 class="text-[10px] font-black text-orange-700 uppercase mb-2">Historial Clínico</h4>
-                        <p class="text-xs mb-1"><b>Antecedentes:</b> ${r.antecedentes.join(', ') || 'Ninguno'}</p>
-                        ${r.meses_embarazo !== "0" ? `<p class="text-xs mb-1"><b>Meses Embarazo:</b> ${r.meses_embarazo}</p>` : ''}
-                        <p class="text-xs mb-1"><b>Alergias:</b> ${r.alergias}</p>
-                        <p class="text-xs"><b>Medicamentos:</b> ${r.medicamentos}</p>
-                    </div>
-                    <div class="p-4 border-2 border-blue-200 rounded-xl bg-blue-50/50">
-                        <h4 class="text-[10px] font-black text-blue-800 uppercase mb-2 flex justify-between items-center">
-                            Notas de Consulta / Evolución
-                            <span class="text-[8px] text-blue-400 font-normal italic">Escribe lo realizado hoy</span>
-                        </h4>
-                        <textarea id="notas-input-${r.id}" rows="5" class="w-full border-2 border-blue-100 rounded-xl p-3 text-sm outline-none focus:border-blue-400 mb-3 bg-white" placeholder="Ej: Se aplicó acupuntura...">${r.notas_consulta || ''}</textarea>
-                        <button onclick="guardarNotas('${r.id}')" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold uppercase text-[10px] hover:bg-blue-700 transition-all shadow-md active:scale-95">
-                            💾 Guardar Notas de Consulta
-                        </button>
-                    </div>
-                </div>`;
-            document.getElementById('modal-detalle').classList.remove('hidden');
-        };
+        async function showCustomModal({ title, message, icon, isPrompt = false, confirmColor = 'bg-emerald-600', showCancel = true }) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('custom-modal');
+                const titleEl = document.getElementById('modal-title');
+                const msgEl = document.getElementById('modal-message');
+                const iconEl = document.getElementById('modal-icon');
+                const inputCont = document.getElementById('modal-input-container');
+                const input = document.getElementById('modal-input');
+                const btnConfirm = document.getElementById('modal-btn-confirm');
+                const btnCancel = document.getElementById('modal-btn-cancel');
 
-        window.guardarNotas = async function(id) {
-            const notas = document.getElementById(`notas-input-${id}`).value;
-            try {
-                await update(ref(db, 'pacientes/' + id), { notas_consulta: notas });
-                showCustomModal({ title: "Guardado", message: "Notas registradas.", icon: "✅", showCancel: false, confirmColor: "bg-blue-600" });
-            } catch (error) {
-                showCustomModal({ title: "Error", message: "Error al guardar.", icon: "❌", showCancel: false, confirmColor: "bg-red-600" });
-            }
-        };
+                titleEl.innerText = title;
+                msgEl.innerText = message;
+                iconEl.innerText = icon;
+                inputCont.classList.toggle('hidden', !isPrompt);
+                btnCancel.classList.toggle('hidden', !showCancel);
+                btnConfirm.className = `flex-1 py-3 rounded-xl font-bold uppercase text-white transition-all text-xs ${confirmColor}`;
+                input.value = "";
+                modal.classList.remove('hidden');
 
-        window.descargarExcel = async function() {
-            const password = await showCustomModal({ title: "Descargar Excel", message: "Introduce la clave maestra.", icon: "📊", isPrompt: true, confirmColor: "bg-blue-600" });
-            if (password === PASS_MAESTRA) {
-                if (dataGlobal.length === 0) return;
-                const excelData = dataGlobal.map(r => ({
-                    Fecha: r.fecha, Nombre: r.nombre, Edad: r.edad, Genero: r.genero, Telefono: r.telefono, Colonia: r.colonia,
-                    Presion: r.presion, Pulso: r.frecuencia, Temp: r.temperatura, Antecedentes: r.antecedentes ? r.antecedentes.join(", ") : "",
-                    Alergias: r.alergias, Medicamentos: r.medicamentos, Interes: r.servicios_interes ? r.servicios_interes.join(", ") : "",
-                    Aplicado: r.servicios_aplicados ? r.servicios_aplicados.join(", ") : "",
-                    Notas_Consulta: r.notas_consulta || "",
-                    Estado: r.borrado ? "Papelera" : "Activo"
-                }));
-                const ws = XLSX.utils.json_to_sheet(excelData);
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, "Pacientes");
-                XLSX.writeFile(wb, `SullyBec_Reporte_${new Date().toLocaleDateString()}.xlsx`);
-            }
-        };
+                const cleanUp = (value) => {
+                    modal.classList.add('hidden');
+                    btnConfirm.onclick = null;
+                    btnCancel.onclick = null;
+                    resolve(value);
+                };
+                btnConfirm.onclick = () => cleanUp(isPrompt ? input.value : true);
+                btnCancel.onclick = () => cleanUp(null);
+            });
+        }
 
-        window.vaciarPapelera = async function() {
-            const password = await showCustomModal({ title: "Vaciar Papelera", message: "Confirmación requerida.", icon: "🗑️", isPrompt: true, confirmColor: "bg-red-600" });
-            if (password === PASS_MAESTRA) {
-                const borrados = dataGlobal.filter(r => r.borrado);
-                borrados.forEach(r => remove(ref(db, 'pacientes/' + r.id)));
-                showCustomModal({ title: "Borrado", message: "Papelera vaciada.", icon: "♻️", showCancel: false });
-            }
-        };
-
-        window.moverAPapelera = (id, estado) => update(ref(db, 'pacientes/' + id), { borrado: estado });
-        
         window.switchTab = (tab) => {
             ['triage', 'consultas', 'papelera'].forEach(t => {
                 const el = document.getElementById(`tab-${t}`);
