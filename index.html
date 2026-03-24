@@ -16,22 +16,33 @@
         .tab-active { border-bottom: 4px solid #059669; color: #059669; }
         .animate-pop { animation: popIn 0.3s ease-out forwards; }
         @keyframes popIn { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        
+        #logo-container img { max-height: 150px; width: auto; object-fit: contain; }
     </style>
 </head>
 <body class="pb-20">
 
     <nav class="bg-white shadow-md sticky top-0 z-50">
-        <div class="max-w-4xl mx-auto flex items-center overflow-x-auto">
-            <button onclick="switchTab('triage')" id="btn-triage" class="flex-none px-6 py-4 font-bold text-xs uppercase tracking-wider tab-active">📝 Registro</button>
-            <button onclick="switchTab('consultas')" id="btn-consultas" class="flex-none px-6 py-4 font-bold text-xs uppercase tracking-wider text-slate-400">🔍 Consultas</button>
-            <button onclick="switchTab('papelera')" id="btn-papelera" class="flex-none px-6 py-4 font-bold text-xs uppercase tracking-wider text-slate-400">🗑️ Papelera</button>
+        <div class="max-w-4xl mx-auto flex items-center justify-between px-4">
+            <div class="flex items-center overflow-x-auto">
+                <button onclick="switchTab('triage')" id="btn-triage" class="flex-none px-6 py-4 font-bold text-xs uppercase tracking-wider tab-active">📝 Registro</button>
+                <button onclick="switchTab('consultas')" id="btn-consultas" class="flex-none px-6 py-4 font-bold text-xs uppercase tracking-wider text-slate-400">🔍 Consultas</button>
+                <button onclick="switchTab('papelera')" id="btn-papelera" class="flex-none px-6 py-4 font-bold text-xs uppercase tracking-wider text-slate-400">🗑️ Papelera</button>
+            </div>
+            <!-- Botón de logo ahora con función de verificación -->
+            <button onclick="verificarParaSubirLogo()" class="bg-slate-100 hover:bg-slate-200 p-2 rounded-lg text-[10px] font-bold uppercase text-slate-500 transition-all">
+                📁 Subir Logo
+            </button>
+            <input type="file" id="logo-uploader" class="hidden" accept="image/*">
         </div>
     </nav>
 
     <div class="max-w-4xl mx-auto p-4 md:p-8">
         <section id="tab-triage">
             <div class="text-center mb-8 flex flex-col items-center">
-                <img src="https://i.ibb.co/Xz9gLgM/Sullybec-Instituto-Logo.png" alt="SullyBec Instituto" class="h-32 w-auto mb-4 drop-shadow-md">
+                <div id="logo-container" class="mb-4">
+                    <img id="main-logo" src="https://i.ibb.co/Xz9gLgM/Sullybec-Instituto-Logo.png" alt="SullyBec Instituto" class="drop-shadow-md">
+                </div>
                 <h1 class="text-3xl font-bold text-emerald-700 uppercase">SullyBec Instituto</h1>
                 <p class="text-slate-500 font-medium italic">Feria de Salud 2026</p>
             </div>
@@ -123,7 +134,7 @@
         </section>
     </div>
 
-    <!-- Modal Detalle Paciente -->
+    <!-- Modal Detalle -->
     <div id="modal-detalle" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-2xl rounded-3xl max-h-[90vh] overflow-hidden flex flex-col animate-pop shadow-2xl">
             <div id="detalle-content" class="overflow-y-auto p-8 flex-1"></div>
@@ -133,7 +144,7 @@
         </div>
     </div>
 
-    <!-- Modal Notificaciones Bonito (Custom) -->
+    <!-- Modal Notificaciones -->
     <div id="custom-modal" class="hidden fixed inset-0 bg-slate-900/80 z-[200] flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-3xl p-8 flex flex-col items-center text-center animate-pop shadow-2xl">
             <div id="modal-icon" class="text-5xl mb-4"></div>
@@ -170,6 +181,25 @@
         const TERAPIAS = ["Masaje Terapéutico", "Acupuntura", "Ventosas", "Quiropráctica", "Desintoxicación Iónica", "Nutrición", "Biomagnetismo", "Corte de Cabello"];
 
         window.addEventListener('DOMContentLoaded', () => {
+            const savedLogo = localStorage.getItem('sullybec_logo');
+            if (savedLogo) {
+                document.getElementById('main-logo').src = savedLogo;
+            }
+
+            document.getElementById('logo-uploader').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const base64Image = event.target.result;
+                        document.getElementById('main-logo').src = base64Image;
+                        localStorage.setItem('sullybec_logo', base64Image);
+                        showCustomModal({ title: "Logo Actualizado", message: "Tu logo se ha guardado localmente.", icon: "🖼️", showCancel: false });
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
             const interesCont = document.getElementById('interes-list');
             const aplicadoCont = document.getElementById('aplicado-list');
             const html = TERAPIAS.map(t => `<label class="checkbox-pill bg-white flex"><input type="checkbox" name="serv_temp" data-val="${t}" value="${t}" class="mr-3 h-5 w-5"><span class="text-sm">${t}</span></label>`).join('');
@@ -211,6 +241,23 @@
                 btnCancel.onclick = () => cleanUp(null);
             });
         }
+
+        // Nueva función para proteger la subida del logo
+        window.verificarParaSubirLogo = async function() {
+            const password = await showCustomModal({ 
+                title: "Acceso Restringido", 
+                message: "Introduce la clave maestra para cambiar el logo.", 
+                icon: "🔒", 
+                isPrompt: true, 
+                confirmColor: "bg-slate-700" 
+            });
+            
+            if (password === PASS_MAESTRA) {
+                document.getElementById('logo-uploader').click();
+            } else if (password !== null) {
+                showCustomModal({ title: "Error", message: "Contraseña incorrecta.", icon: "❌", showCancel: false, confirmColor: "bg-red-600" });
+            }
+        };
 
         window.guardarRegistro = async function() {
             const form = document.getElementById('clinicForm');
@@ -285,91 +332,39 @@
             </div>`;
         }
 
-        window.descargarExcel = async function() {
-            const password = await showCustomModal({ 
-                title: "Descargar Excel", 
-                message: "Acceso restringido. Introduce la clave maestra.", 
-                icon: "📊", 
-                isPrompt: true, 
-                confirmColor: "bg-blue-600" 
-            });
-
-            if (password === PASS_MAESTRA) {
-                if (dataGlobal.length === 0) { 
-                    showCustomModal({ title: "Vacío", message: "No hay datos para exportar aún.", icon: "📂", showCancel: false });
-                    return; 
-                }
-                
-                const excelData = dataGlobal.map(r => ({
-                    ID: r.id,
-                    Fecha: r.fecha,
-                    Nombre: r.nombre,
-                    Edad: r.edad,
-                    Genero: r.genero,
-                    Telefono: r.telefono,
-                    Colonia: r.colonia,
-                    Presion: r.presion,
-                    Frecuencia: r.frecuencia,
-                    Temperatura: r.temperatura,
-                    Antecedentes: r.antecedentes ? r.antecedentes.join(", ") : "",
-                    Gestacion_Meses: r.meses_embarazo,
-                    Alergias: r.alergias,
-                    Medicamentos: r.medicamentos,
-                    Interes_Servicios: r.servicios_interes ? r.servicios_interes.join(", ") : "",
-                    Terapias_Aplicadas: r.servicios_aplicados ? r.servicios_aplicados.join(", ") : "",
-                    Notas: r.notas_consulta || "",
-                    Estado: r.borrado ? "Papelera" : "Activo"
-                }));
-
-                const ws = XLSX.utils.json_to_sheet(excelData);
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, "Pacientes_Feria_Salud");
-                XLSX.writeFile(wb, `Reporte_SullyBec_${new Date().toLocaleDateString()}.xlsx`);
-                
-                showCustomModal({ title: "Generado", message: "Tu archivo Excel se ha descargado.", icon: "💾", showCancel: false });
-            } else if (password !== null) {
-                showCustomModal({ title: "Denegado", message: "Contraseña incorrecta.", icon: "❌", showCancel: false, confirmColor: "bg-red-600" });
-            }
-        };
-
         window.verDetalle = function(id) {
             const r = dataGlobal.find(reg => reg.id === id);
             if (!r) return;
             const content = document.getElementById('detalle-content');
             content.innerHTML = `
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-3xl font-black uppercase text-emerald-700">${r.nombre}</h2>
-                    <span class="text-xs font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full">${r.fecha}</span>
+                    <h2 class="text-2xl font-black uppercase text-emerald-700">${r.nombre}</h2>
+                    <span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full">${r.fecha}</span>
                 </div>
-                <div class="grid grid-cols-2 gap-6 mb-8 text-sm bg-slate-50 p-6 rounded-2xl">
+                <div class="grid grid-cols-2 gap-4 mb-6 text-xs bg-slate-50 p-4 rounded-xl border border-slate-100">
                     <p><b>EDAD:</b> ${r.edad} años</p><p><b>GÉNERO:</b> ${r.genero}</p><p><b>TEL:</b> ${r.telefono}</p><p><b>COLONIA:</b> ${r.colonia}</p>
                 </div>
-                <div class="grid grid-cols-3 gap-4 mb-8 text-center">
-                    <div class="p-3 bg-red-50 rounded-xl border border-red-100"><p class="text-[10px] font-bold text-red-400 uppercase">Presión</p><p class="font-black text-red-700">${r.presion}</p></div>
-                    <div class="p-3 bg-red-50 rounded-xl border border-red-100"><p class="text-[10px] font-bold text-red-400 uppercase">Frecuencia</p><p class="font-black text-red-700">${r.frecuencia}</p></div>
-                    <div class="p-3 bg-red-50 rounded-xl border border-red-100"><p class="text-[10px] font-bold text-red-400 uppercase">Temp</p><p class="font-black text-red-700">${r.temperatura}°C</p></div>
+                <div class="grid grid-cols-3 gap-2 mb-6 text-center">
+                    <div class="p-2 bg-red-50 rounded-xl border border-red-100"><p class="text-[8px] font-bold text-red-400 uppercase">Presión</p><p class="font-black text-red-700 text-sm">${r.presion}</p></div>
+                    <div class="p-2 bg-red-50 rounded-xl border border-red-100"><p class="text-[8px] font-bold text-red-400 uppercase">Pulso</p><p class="font-black text-red-700 text-sm">${r.frecuencia}</p></div>
+                    <div class="p-2 bg-red-50 rounded-xl border border-red-100"><p class="text-[8px] font-bold text-red-400 uppercase">Temp</p><p class="font-black text-red-700 text-sm">${r.temperatura}°C</p></div>
                 </div>
                 <div class="space-y-4">
-                    <div class="p-4 border-2 border-orange-100 rounded-2xl bg-orange-50/30">
-                        <h4 class="text-xs font-black text-orange-700 uppercase mb-2">Salud y Antecedentes</h4>
-                        <p class="text-sm"><b>Antecedentes:</b> ${r.antecedentes.join(', ') || 'Ninguno'}</p>
-                        ${r.meses_embarazo !== "0" ? `<p class="text-sm"><b>Gestación:</b> ${r.meses_embarazo} meses</p>` : ''}
-                        <p class="text-sm"><b>Alergias:</b> ${r.alergias}</p><p class="text-sm"><b>Medicamentos:</b> ${r.medicamentos}</p>
+                    <div class="p-4 border border-orange-100 rounded-xl bg-orange-50/20">
+                        <h4 class="text-[10px] font-black text-orange-700 uppercase mb-2">Historial Clínico</h4>
+                        <p class="text-xs mb-1"><b>Antecedentes:</b> ${r.antecedentes.join(', ') || 'Ninguno'}</p>
+                        ${r.meses_embarazo !== "0" ? `<p class="text-xs mb-1"><b>Meses Embarazo:</b> ${r.meses_embarazo}</p>` : ''}
+                        <p class="text-xs mb-1"><b>Alergias:</b> ${r.alergias}</p>
+                        <p class="text-xs"><b>Medicamentos:</b> ${r.medicamentos}</p>
                     </div>
-                    <div class="p-4 border-2 border-emerald-200 rounded-2xl bg-emerald-50">
-                        <h4 class="text-xs font-black text-emerald-800 uppercase mb-2">Terapias Aplicadas</h4>
-                        <p class="text-base font-bold text-emerald-900 mb-2">${r.servicios_aplicados.join(', ') || 'PENDIENTE DE APLICAR'}</p>
-                    </div>
-
-                    <!-- NUEVA SECCIÓN DE NOTAS -->
-                    <div class="p-4 border-2 border-blue-200 rounded-2xl bg-blue-50/50">
-                        <h4 class="text-xs font-black text-blue-800 uppercase mb-2 flex justify-between">
-                            Notas de Consulta
-                            <span class="text-[9px] lowercase font-normal italic">Se guarda automáticamente al presionar el botón</span>
+                    <div class="p-4 border-2 border-blue-200 rounded-xl bg-blue-50/50">
+                        <h4 class="text-[10px] font-black text-blue-800 uppercase mb-2 flex justify-between items-center">
+                            Notas de Consulta / Evolución
+                            <span class="text-[8px] text-blue-400 font-normal italic">Escribe lo realizado hoy</span>
                         </h4>
-                        <textarea id="notas-input-${r.id}" rows="4" class="w-full border-2 border-blue-100 rounded-xl p-3 text-sm outline-none focus:border-blue-400 mb-3" placeholder="Escribe aquí los hallazgos, tratamiento realizado o recomendaciones...">${r.notas_consulta || ''}</textarea>
-                        <button onclick="guardarNotas('${r.id}')" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold uppercase text-xs hover:bg-blue-700 transition-all shadow-md">
-                            📝 Guardar Notas de Evolución
+                        <textarea id="notas-input-${r.id}" rows="5" class="w-full border-2 border-blue-100 rounded-xl p-3 text-sm outline-none focus:border-blue-400 mb-3 bg-white" placeholder="Ej: Se aplicó acupuntura...">${r.notas_consulta || ''}</textarea>
+                        <button onclick="guardarNotas('${r.id}')" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold uppercase text-[10px] hover:bg-blue-700 transition-all shadow-md active:scale-95">
+                            💾 Guardar Notas de Consulta
                         </button>
                     </div>
                 </div>`;
@@ -380,41 +375,37 @@
             const notas = document.getElementById(`notas-input-${id}`).value;
             try {
                 await update(ref(db, 'pacientes/' + id), { notas_consulta: notas });
-                showCustomModal({ title: "Guardado", message: "Las notas han sido actualizadas con éxito.", icon: "📋", showCancel: false, confirmColor: "bg-blue-600" });
+                showCustomModal({ title: "Guardado", message: "Notas registradas.", icon: "✅", showCancel: false, confirmColor: "bg-blue-600" });
             } catch (error) {
-                showCustomModal({ title: "Error", message: "No se pudieron guardar las notas.", icon: "❌", showCancel: false, confirmColor: "bg-red-600" });
+                showCustomModal({ title: "Error", message: "Error al guardar.", icon: "❌", showCancel: false, confirmColor: "bg-red-600" });
+            }
+        };
+
+        window.descargarExcel = async function() {
+            const password = await showCustomModal({ title: "Descargar Excel", message: "Introduce la clave maestra.", icon: "📊", isPrompt: true, confirmColor: "bg-blue-600" });
+            if (password === PASS_MAESTRA) {
+                if (dataGlobal.length === 0) return;
+                const excelData = dataGlobal.map(r => ({
+                    Fecha: r.fecha, Nombre: r.nombre, Edad: r.edad, Genero: r.genero, Telefono: r.telefono, Colonia: r.colonia,
+                    Presion: r.presion, Pulso: r.frecuencia, Temp: r.temperatura, Antecedentes: r.antecedentes ? r.antecedentes.join(", ") : "",
+                    Alergias: r.alergias, Medicamentos: r.medicamentos, Interes: r.servicios_interes ? r.servicios_interes.join(", ") : "",
+                    Aplicado: r.servicios_aplicados ? r.servicios_aplicados.join(", ") : "",
+                    Notas_Consulta: r.notas_consulta || "",
+                    Estado: r.borrado ? "Papelera" : "Activo"
+                }));
+                const ws = XLSX.utils.json_to_sheet(excelData);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Pacientes");
+                XLSX.writeFile(wb, `SullyBec_Reporte_${new Date().toLocaleDateString()}.xlsx`);
             }
         };
 
         window.vaciarPapelera = async function() {
-            const password = await showCustomModal({ 
-                title: "Vaciar Papelera", 
-                message: "Introduce contraseña para borrar permanentemente.", 
-                icon: "🗑️", 
-                isPrompt: true, 
-                confirmColor: "bg-red-600" 
-            });
-
+            const password = await showCustomModal({ title: "Vaciar Papelera", message: "Confirmación requerida.", icon: "🗑️", isPrompt: true, confirmColor: "bg-red-600" });
             if (password === PASS_MAESTRA) {
                 const borrados = dataGlobal.filter(r => r.borrado);
-                if (borrados.length === 0) { 
-                    showCustomModal({ title: "Vacío", message: "La papelera ya está vacía.", icon: "🍃", showCancel: false });
-                    return; 
-                }
-                
-                const confirmar = await showCustomModal({ 
-                    title: "¿Estás seguro?", 
-                    message: `Se eliminarán definitivamente ${borrados.length} registros. Esta acción es irreversible.`, 
-                    icon: "🚨", 
-                    confirmColor: "bg-red-700" 
-                });
-
-                if (confirmar) {
-                    borrados.forEach(r => remove(ref(db, 'pacientes/' + r.id)));
-                    showCustomModal({ title: "Borrado", message: "Los registros han sido eliminados del servidor.", icon: "♻️", showCancel: false });
-                }
-            } else if (password !== null) {
-                showCustomModal({ title: "Denegado", message: "Contraseña incorrecta.", icon: "❌", showCancel: false, confirmColor: "bg-red-600" });
+                borrados.forEach(r => remove(ref(db, 'pacientes/' + r.id)));
+                showCustomModal({ title: "Borrado", message: "Papelera vaciada.", icon: "♻️", showCancel: false });
             }
         };
 
