@@ -109,7 +109,10 @@
         </section>
 
         <section id="tab-papelera" class="hidden">
-            <h2 class="text-2xl font-bold text-slate-600 mb-6 uppercase tracking-tight">Papelera / Historial</h2>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-slate-600 uppercase tracking-tight">Papelera / Historial</h2>
+                <button onclick="vaciarPapelera()" class="bg-red-100 text-red-600 px-4 py-2 rounded-lg font-bold text-[10px] hover:bg-red-200 transition-all uppercase">🗑️ Vaciar Papelera</button>
+            </div>
             <div id="lista-papelera" class="grid grid-cols-1 gap-4"></div>
         </section>
     </div>
@@ -125,7 +128,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+        import { getDatabase, ref, set, onValue, update, remove } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAdeZG8-SX37MVIa2HcH_MRlPyu1eRrd-U",
@@ -139,13 +142,14 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         let dataGlobal = [];
+        const PASS_MAESTRA = "Sully2026";
 
         const TERAPIAS = ["Masaje Terapéutico", "Acupuntura", "Ventosas", "Quiropráctica", "Desintoxicación Iónica", "Nutrición", "Biomagnetismo", "Corte de Cabello"];
 
         window.addEventListener('DOMContentLoaded', () => {
             const interesCont = document.getElementById('interes-list');
             const aplicadoCont = document.getElementById('aplicado-list');
-            const html = TERAPIAS.map(t => `<label class="checkbox-pill bg-white flex"><input type="checkbox" name="serv_temp" data-val="${t}" value="${t}" class="mr-3"><span class="text-sm">${t}</span></label>`).join('');
+            const html = TERAPIAS.map(t => `<label class="checkbox-pill bg-white flex"><input type="checkbox" name="serv_temp" data-val="${t}" value="${t}" class="mr-3 h-5 w-5"><span class="text-sm">${t}</span></label>`).join('');
             interesCont.innerHTML = html.replace(/serv_temp/g, 'servicio_interes');
             aplicadoCont.innerHTML = html.replace(/serv_temp/g, 'servicio_aplicado');
             escucharDatos();
@@ -162,7 +166,7 @@
                 nombre: fd.get('nombre').toUpperCase(),
                 edad: fd.get('edad'),
                 telefono: fd.get('telefono'),
-                colonia: fd.get('colonia'),
+                colonia: fd.get('colonia').toUpperCase(),
                 genero: fd.get('genero'),
                 presion: fd.get('presion'),
                 frecuencia: fd.get('frecuencia'),
@@ -175,7 +179,11 @@
                 servicios_aplicados: Array.from(fd.getAll('servicio_aplicado')),
                 borrado: false
             };
-            set(ref(db, 'pacientes/' + nuevoID), registro).then(() => { form.reset(); alert("✅ Guardado"); });
+            set(ref(db, 'pacientes/' + nuevoID), registro).then(() => { 
+                form.reset(); 
+                alert("✅ Guardado"); 
+                switchTab('consultas');
+            });
         };
 
         function escucharDatos() {
@@ -187,30 +195,37 @@
         }
 
         function actualizarUI() {
-            const activos = dataGlobal.filter(r => !r.borrado).reverse();
-            const borrados = dataGlobal.filter(r => r.borrado).reverse();
-            document.getElementById('lista-pacientes').innerHTML = activos.map(r => renderCard(r, false)).join('');
-            document.getElementById('lista-papelera').innerHTML = borrados.map(r => renderCard(r, true)).join('');
+            const activos = dataGlobal.filter(r => !r.borrado).sort((a, b) => b.id - a.id);
+            const borrados = dataGlobal.filter(r => r.borrado).sort((a, b) => b.id - a.id);
+            document.getElementById('lista-pacientes').innerHTML = activos.length ? activos.map(r => renderCard(r, false)).join('') : '<p class="text-center py-10 text-slate-400 italic text-sm">No hay pacientes activos.</p>';
+            document.getElementById('lista-papelera').innerHTML = borrados.length ? borrados.map(r => renderCard(r, true)).join('') : '<p class="text-center py-10 text-slate-400 italic text-sm">Papelera vacía.</p>';
         }
 
         function renderCard(r, esPapelera) {
+            const tieneAlertas = (r.antecedentes && r.antecedentes.length > 0) || (r.alergias && r.alergias !== "Ninguna" && r.alergias !== "");
             return `
-            <div class="bg-white p-5 rounded-2xl border-l-8 border-emerald-500 shadow-sm cursor-pointer hover:shadow-md transition-shadow" onclick="verDetalle('${r.id}')">
-                <div class="flex justify-between items-start">
-                    <div class="flex-1">
-                        <h3 class="font-bold text-slate-800 text-lg uppercase">${r.nombre}</h3>
-                        <p class="text-xs text-slate-500 font-bold">${r.telefono} | COL: ${r.colonia}</p>
-                        <p class="text-[10px] mt-2 text-emerald-700 font-black uppercase">Aplicado: ${r.servicios_aplicados.join(', ') || 'Pendiente'}</p>
+            <div class="bg-white p-5 rounded-2xl border-l-8 ${tieneAlertas ? 'border-red-500 bg-red-50/10' : 'border-emerald-500'} shadow-sm mb-4 animate-pop hover:shadow-md transition-all">
+                <div class="flex justify-between items-start" onclick="verDetalle('${r.id}')">
+                    <div class="flex-1 cursor-pointer">
+                        <h3 class="font-bold text-slate-800 text-lg uppercase">${r.nombre} ${tieneAlertas ? '⚠️' : ''}</h3>
+                        <p class="text-[11px] font-bold text-slate-500 uppercase">📞 ${r.telefono} • COL: ${r.colonia}</p>
+                        <div class="mt-3 flex flex-wrap gap-1">
+                            ${(r.servicios_aplicados || []).map(s => `<span class="text-[9px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold uppercase">${s}</span>`).join('') || '<span class="text-[9px] bg-slate-100 text-slate-400 px-2 py-0.5 rounded-full font-bold uppercase">En espera</span>'}
+                        </div>
                     </div>
-                    <button onclick="event.stopPropagation(); moverAPapelera('${r.id}', ${!esPapelera})" class="p-2 ml-4 bg-slate-100 rounded-full hover:bg-slate-200">
-                        ${esPapelera ? '🔄' : '🗑️'}
-                    </button>
+                    <div class="flex flex-col items-end gap-4">
+                        <span class="text-[10px] text-slate-300 font-medium">${r.fecha ? r.fecha.split(',')[1] || r.fecha : ''}</span>
+                        <button onclick="event.stopPropagation(); moverAPapelera('${r.id}', ${!esPapelera})" class="p-2 bg-slate-50 rounded-xl hover:bg-slate-200 transition-colors">
+                            ${esPapelera ? '🔄' : '🗑️'}
+                        </button>
+                    </div>
                 </div>
             </div>`;
         }
 
         window.verDetalle = function(id) {
             const r = dataGlobal.find(reg => reg.id === id);
+            if (!r) return;
             const content = document.getElementById('detalle-content');
             content.innerHTML = `
                 <div class="flex justify-between items-center mb-6">
@@ -218,10 +233,7 @@
                     <span class="text-xs font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full">${r.fecha}</span>
                 </div>
                 <div class="grid grid-cols-2 gap-6 mb-8 text-sm bg-slate-50 p-6 rounded-2xl">
-                    <p><b>EDAD:</b> ${r.edad} años</p>
-                    <p><b>GÉNERO:</b> ${r.genero}</p>
-                    <p><b>TEL:</b> ${r.telefono}</p>
-                    <p><b>COLONIA:</b> ${r.colonia}</p>
+                    <p><b>EDAD:</b> ${r.edad} años</p><p><b>GÉNERO:</b> ${r.genero}</p><p><b>TEL:</b> ${r.telefono}</p><p><b>COLONIA:</b> ${r.colonia}</p>
                 </div>
                 <div class="grid grid-cols-3 gap-4 mb-8 text-center">
                     <div class="p-3 bg-red-50 rounded-xl border border-red-100"><p class="text-[10px] font-bold text-red-400 uppercase">Presión</p><p class="font-black text-red-700">${r.presion}</p></div>
@@ -232,30 +244,41 @@
                     <div class="p-4 border-2 border-orange-100 rounded-2xl bg-orange-50/30">
                         <h4 class="text-xs font-black text-orange-700 uppercase mb-2">Salud y Antecedentes</h4>
                         <p class="text-sm"><b>Antecedentes:</b> ${r.antecedentes.join(', ') || 'Ninguno'}</p>
-                        ${r.meses_embarazo !== "0" ? `<p class="text-sm"><b>Meses de Embarazo:</b> ${r.meses_embarazo}</p>` : ''}
-                        <p class="text-sm"><b>Alergias:</b> ${r.alergias}</p>
-                        <p class="text-sm"><b>Medicamentos:</b> ${r.medicamentos}</p>
-                    </div>
-                    <div class="p-4 border-2 border-blue-100 rounded-2xl bg-blue-50/30">
-                        <h4 class="text-xs font-black text-blue-700 uppercase mb-2">Servicios Solicitados e Interés</h4>
-                        <p class="text-sm">${r.servicios_interes.join(', ') || 'Sin especificar'}</p>
+                        ${r.meses_embarazo !== "0" ? `<p class="text-sm"><b>Gestación:</b> ${r.meses_embarazo} meses</p>` : ''}
+                        <p class="text-sm"><b>Alergias:</b> ${r.alergias}</p><p class="text-sm"><b>Medicamentos:</b> ${r.medicamentos}</p>
                     </div>
                     <div class="p-4 border-2 border-emerald-200 rounded-2xl bg-emerald-50">
-                        <h4 class="text-xs font-black text-emerald-800 uppercase mb-2">Terapias Aplicadas Realmente</h4>
+                        <h4 class="text-xs font-black text-emerald-800 uppercase mb-2">Terapias Aplicadas</h4>
                         <p class="text-base font-bold text-emerald-900">${r.servicios_aplicados.join(', ') || 'PENDIENTE DE APLICAR'}</p>
                     </div>
-                </div>
-            `;
+                </div>`;
             document.getElementById('modal-detalle').classList.remove('hidden');
         };
 
+        window.vaciarPapelera = function() {
+            const password = prompt("Introduce la contraseña para vaciar permanentemente:");
+            if (password === PASS_MAESTRA) {
+                const borrados = dataGlobal.filter(r => r.borrado);
+                if (borrados.length === 0) { alert("La papelera ya está vacía."); return; }
+                if (confirm(`¿Eliminar definitivamente ${borrados.length} registros? Esta acción no se puede deshacer.`)) {
+                    borrados.forEach(r => remove(ref(db, 'pacientes/' + r.id)));
+                    alert("🗑️ Papelera vaciada.");
+                }
+            } else if (password !== null) {
+                alert("❌ Contraseña incorrecta.");
+            }
+        };
+
         window.moverAPapelera = (id, estado) => update(ref(db, 'pacientes/' + id), { borrado: estado });
+        
         window.switchTab = (tab) => {
             ['triage', 'consultas', 'papelera'].forEach(t => {
                 document.getElementById(`tab-${t}`).classList.toggle('hidden', t !== tab);
                 document.getElementById(`btn-${t}`).classList.toggle('tab-active', t === tab);
+                document.getElementById(`btn-${t}`).classList.toggle('text-slate-400', t !== tab);
             });
         };
+
         window.cerrarModal = () => document.getElementById('modal-detalle').classList.add('hidden');
     </script>
 </body>
