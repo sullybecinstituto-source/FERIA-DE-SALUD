@@ -6,17 +6,47 @@
     <title>SullyBec Instituto - Gestión Clínica</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <style>
+        <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
-        .section-title { border-left: 4px solid #059669; padding-left: 1rem; margin-bottom: 1.5rem; margin-top: 2rem; color: #1e293b; font-weight: 700; text-transform: uppercase; font-size: 0.875rem; letter-spacing: 0.05em; }
-        .checkbox-pill { display: flex; align-items: center; padding: 0.5rem 0.7rem; border-radius: 0.5rem; border: 1px solid #e2e8f0; cursor: pointer; transition: all 0.2s; font-size: 0.85rem; }
-        .checkbox-pill:hover { background-color: #f8fafc; border-color: #059669; }
-        input[type="checkbox"]:checked + span { color: #059669; font-weight: 700; }
-        .tab-active { border-bottom: 4px solid #059669; color: #059669; }
-        .animate-pop { animation: popIn 0.3s ease-out forwards; }
-        @keyframes popIn { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+        }
+        .section-title {
+            border-left: 4px solid #059669;
+            padding-left: 1rem;
+            margin-bottom: 1.5rem;
+            margin-top: 2rem;
+            color: #1e293b;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            letter-spacing: 0.05em;
+        }
+        .checkbox-pill {
+            display: flex;
+            align-items: center;
+            padding: 0.6rem 0.8rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .checkbox-pill:hover {
+            background-color: #f8fafc;
+        }
+        input[type="checkbox"]:checked + span {
+            color: #059669;
+            font-weight: 700;
+        }
+        .tab-active {
+            border-bottom: 4px solid #059669;
+            color: #059669;
+        }
     </style>
+
 </head>
 <body class="pb-20">
 
